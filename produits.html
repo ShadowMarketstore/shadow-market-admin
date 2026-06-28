@@ -5,27 +5,56 @@
     <title>Shadow Market - Produits</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 20px; }
-        h1 { color: #00ffff; border-bottom: 1px solid #00ffff; padding-bottom: 10px; }
+        body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 20px; margin: 0; }
+        h1 { color: #00ffff; border-bottom: 2px solid #00ffff; padding-bottom: 10px; font-size: 20px; }
         
-        .product-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
-        .product-card { 
+        .product-grid { 
             display: grid; 
             grid-template-columns: 80px 1fr 100px; 
-            align-items: center; 
-            background: #1a1a1a; 
-            padding: 10px; 
-            border-radius: 8px;
-            border: 1px solid #333;
+            gap: 15px; 
+            margin-top: 20px;
+            align-items: center;
         }
-        .img-placeholder { width: 60px; height: 60px; background: #333; border-radius: 4px; }
-        .sales-count { text-align: right; color: #00ffff; font-weight: bold; }
+        .header-row { font-weight: bold; color: #b0b0b0; border-bottom: 1px solid #333; padding-bottom: 10px; }
+        .product-item { background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #333; }
+        .product-img { width: 60px; height: 40px; background: #333; border-radius: 4px; object-fit: cover; }
+        .sales-val { text-align: right; color: #00ffff; font-weight: bold; }
     </style>
 </head>
 <body>
+
     <h1>Mes Produits</h1>
-    <div class="product-list" id="productList">
-        </div>
+    
+    <div class="product-grid header-row">
+        <div>Image</div>
+        <div>Nom</div>
+        <div style="text-align: right;">Ventes</div>
+    </div>
+
+    <div id="product-container"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const supabase = supabase.createClient(
+            'https://jsuvimxjmjiljntmgbzu.supabase.co', 
+            'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
+        );
+
+        async function fetchProducts() {
+            const { data, error } = await supabase.from('products').select('*');
+            
+            if (data) {
+                const container = document.getElementById('product-container');
+                container.innerHTML = data.map(p => `
+                    <div class="product-grid product-item">
+                        <img src="${p.image_url || ''}" class="product-img" onerror="this.style.display='none'">
+                        <div>${p.name || 'Produit'}</div>
+                        <div class="sales-val">${p.sales_count || 0}</div>
+                    </div>
+                `).join('');
+            }
+        }
+        fetchProducts();
+    </script>
 </body>
 </html>
-
