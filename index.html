@@ -2,80 +2,53 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shadow Market - Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { margin: 0; background-color: #0a0a0a; color: white; font-family: sans-serif; overflow-x: hidden; }
+        body { margin: 0; background-color: #0a0a0a; color: white; font-family: sans-serif; }
         
-        /* Menu Burger (trois traits) */
-        .menu-btn { cursor: pointer; padding: 20px; font-size: 24px; position: fixed; top: 0; left: 0; z-index: 2; color: white; }
-        
-        /* Sidebar Vertical Correcte */
-        .sidebar {
-            height: 100%; width: 0; position: fixed; z-index: 1; top: 0; left: 0;
-            background-color: #1a1a1a; overflow-x: hidden; transition: width 0.5s;
-            padding-top: 60px; border-right: 2px solid #ff0000;
-        }
-        
-        /* Style des liens dans la sidebar avec icônes */
-        .sidebar a, .sidebar button {
-            padding: 15px 25px; text-decoration: none; font-size: 18px;
-            color: white; display: flex; align-items: center; gap: 10px; /* Aligne icône et texte */
-            border: none; background: none; width: 100%; text-align: left; cursor: pointer;
-        }
-        .sidebar a:hover, .sidebar button:hover { color: #ff0000; }
-        
-        /* Sidebar Active - Largeur visible */
+        /* En-tête */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #333; }
+        .menu-btn { cursor: pointer; font-size: 24px; }
+        .currency-icon { font-size: 24px; color: white; }
+
+        /* Sidebar */
+        .sidebar { height: 100%; width: 0; position: fixed; top: 0; left: 0; background-color: #1a1a1a; transition: 0.5s; padding-top: 80px; z-index: 10; border-right: 2px solid #ff0000; }
+        .sidebar a, .sidebar button { padding: 15px 25px; display: block; color: white; text-decoration: none; font-size: 18px; border: none; background: none; width: 100%; text-align: left; }
         .sidebar.active { width: 250px; }
-        
-        /* Contenu Principal - Zone pour le Dashboard */
-        .main-content { margin-left: 0; padding: 20px 20px 20px 60px; transition: margin-left 0.5s; }
-        .sidebar.active ~ .main-content { margin-left: 250px; } /* Décale le contenu quand la sidebar est ouverte */
 
-        h1 { margin-top: 0; color: white; font-size: 24px; }
-
-        /* Bloc Statistique - Format Compact */
-        .stats-container { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 20px; }
-        .stats-card {
-            background-color: #1a1a1a; padding: 15px; border-radius: 10px;
-            border-left: 4px solid #ff0000; width: 200px;
-        }
-        .stats-card h3 { margin: 0; font-size: 16px; color: #b0b0b0; }
-        .stats-card p { margin: 10px 0 0; font-size: 24px; color: #ff0000; font-weight: bold; }
-
+        /* Dashboard */
+        .content { padding: 20px; }
+        .stats-card { background: #1a1a1a; padding: 15px; border-radius: 10px; border-left: 4px solid #ff0000; width: fit-content; }
+        .graph-placeholder { margin-top: 30px; width: 100%; height: 200px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; color: #555; }
     </style>
 </head>
 <body>
 
-    <div class="menu-btn" onclick="toggleNav()">☰</div>
+    <div class="header">
+        <div class="menu-btn" onclick="toggleNav()">☰</div>
+        <div>Shadow Market</div>
+        <div class="currency-icon">€</div>
+    </div>
 
     <div id="sidebar" class="sidebar">
         <a href="#"><i class="fas fa-home"></i> Accueil</a>
         <a href="#"><i class="fas fa-shopping-cart"></i> Commandes</a>
-        <button onclick="addProduct()"><i class="fas fa-plus"></i> Ajouter un produit</button>
+        <button onclick="alert('Ajout')"><i class="fas fa-plus"></i> Ajouter un produit</button>
     </div>
 
-    <div class="main-content">
-        <h1>Tableau de bord</h1>
-        
-        <div class="stats-container">
-            <div class="stats-card">
-                <h3>Argent généré</h3>
-                <p>0 €</p>
-            </div>
-            </div>
+    <div class="content">
+        <h2>Tableau de bord</h2>
+        <div class="stats-card">
+            <p>Argent généré</p>
+            <h3 style="color: #ff0000; margin: 0;">0 €</h3>
+        </div>
+        <div class="graph-placeholder">
+            [Zone du graphique - Courbe verte]
+        </div>
     </div>
 
     <script>
-        // Fonction pour ouvrir/fermer la sidebar
-        function toggleNav() {
-            document.getElementById("sidebar").classList.toggle("active");
-        }
-        
-        function addProduct() {
-            alert("Ouverture du formulaire d'ajout...");
-        }
+        function toggleNav() { document.getElementById("sidebar").classList.toggle("active"); }
     </script>
 </body>
 </html>
