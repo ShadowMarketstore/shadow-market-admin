@@ -1,80 +1,62 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shadow Market - Stock</title>
-    <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; }
-        
-        /* Navigation */
-        nav { background: #111; padding: 15px; border-bottom: 2px solid #00ffff; display: flex; gap: 20px; }
-        nav a { color: #fff; text-decoration: none; font-weight: bold; }
-
-        h1 { color: #00ffff; padding: 20px; margin: 0; font-size: 20px; border-bottom: 2px solid #00ffff; }
-
-        /* Structure du tableau avec En-tête Fixe */
-        .table-wrapper { width: 100%; padding: 10px; box-sizing: border-box; }
-        .grid-table { display: grid; grid-template-columns: 80px 1fr 80px; width: 100%; border: 1px solid #333; }
-        
-        /* Cellules (header et contenu) */
-        .cell { padding: 12px 5px; border-bottom: 1px solid #333; border-right: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 13px; }
-        .header { background-color: #1a1a1a; font-weight: bold; color: #00ffff; }
-        
-        .product-img { width: 50px; height: 35px; background: #222; border-radius: 2px; object-fit: cover; }
-    </style>
-</head>
-<body>
-
-    <nav>
-        <a href="index.html">Accueil</a>
-        <a href="produits.html" style="color: #00ffff;">Stock</a>
-        <a href="formulaire.html">Ajouter</a>
-    </nav>
-
-    <h1>Mes Produits</h1>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // 1. Initialisation des constantes et du client Supabase
+    const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZimxjbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4';
     
-    <div class="table-wrapper">
-        <div class="grid-table" id="product-container">
-            <div class="cell header">Image</div>
-            <div class="cell header">NOM PRODUCT</div>
-            <div class="cell header">Stock</div>
-            
-            </div>
-    </div>
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const supabase = supabase.createClient(
-            'https://jsuvimxjmjiljntmgbzu.supabase.co', 
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZimxjbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4'
-        );
-
-        async function init() {
-            const container = document.getElementById('product-container');
-            
-            try {
-                const { data, error } = await supabase
-                    .from('products')
-                    .select('name, image_url, stock_quantity')
-                    .order('stock_quantity', { ascending: false });
-
-                if (error) throw error;
-
-                // Génération des lignes de produits
-                const rows = data.map(p => `
-                    <div class="cell"><img src="${p.image_url || ''}" class="product-img" onerror="this.style.display='none'"></div>
-                    <div class="cell" style="justify-content: flex-start;">${p.name || 'Produit'}</div>
-                    <div class="cell">${p.stock_quantity !== null ? p.stock_quantity : 0}</div>
-                `).join('');
-
-                container.insertAdjacentHTML('beforeend', rows);
-            } catch (err) {
-                console.error(err);
-                container.insertAdjacentHTML('beforeend', `<div class="cell" style="grid-column: span 3; color: red;">Erreur : ${err.message}</div>`);
-            }
+    // 2. Fonction principale de récupération et d'affichage
+    async function fetchProducts() {
+        const list = document.getElementById('product-list');
+        
+        // Indicateur de chargement
+        if (list) {
+            list.innerHTML = '<div style="padding: 20px; color: #00ffff;">Chargement des produits en cours...</div>';
         }
-        init();
-    </script>
-</body>
-</html>
+
+        try {
+            // Requête vers la table 'products'
+            const { data, error } = await supabase
+                .from('products')
+                .select('name, image_url, sales_count');
+
+            if (error) {
+                console.error("Erreur lors de la requête Supabase :", error);
+                if (list) list.innerHTML = `<div style="padding: 20px; color: red;">Erreur de chargement : ${error.message}</div>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                if (list) list.innerHTML = '<div style="padding: 20px;">Aucun article trouvé dans le stock.</div>';
+                return;
+            }
+
+            // Génération du tableau complet
+            const htmlContent = data.map(p => `
+                <div class="grid-row">
+                    <div class="cell">
+                        <img src="${p.image_url || ''}" class="img-cell" onerror="this.style.display='none'">
+                    </div>
+                    <div class="cell" style="justify-content: flex-start; padding-left: 10px;">
+                        ${p.name || 'Produit sans nom'}
+                    </div>
+                    <div class="cell">
+                        ${p.sales_count !== null ? p.sales_count : 0}
+                    </div>
+                </div>
+            `).join('');
+
+            if (list) {
+                list.innerHTML = htmlContent;
+            }
+
+        } catch (err) {
+            console.error("Erreur critique dans le script :", err);
+            if (list) list.innerHTML = `<div style="padding: 20px; color: red;">Une erreur imprévue est survenue.</div>`;
+        }
+    }
+
+    // 3. Exécution au chargement de la page
+    document.addEventListener('DOMContentLoaded', fetchProducts);
+</script>
