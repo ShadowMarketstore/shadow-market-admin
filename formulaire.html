@@ -70,41 +70,56 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Configuration de ton client Supabase (remplace par tes accès si nécessaire)
-        const supabase = supabase.createClient('URL', 'KEY');
-        
+        let supabase = null;
         let uploadedImageUrl = "";
 
+        // Initialisation sécurisée pour éviter de faire planter le code entier si les clés manquent
+        try {
+            supabase = supabase.createClient('URL', 'KEY');
+        } catch (e) {
+            console.log("Supabase non configuré ou clés manquantes.");
+        }
+        
         // Fonction de traitement et de fermeture du menu
         async function processFile(file) {
             if (!file) return;
 
-            // 1. Fermer immédiatement le menu pour supprimer l'espace blanc gênant
+            // 1. Ferme instantanément le menu pour nettoyer l'interface et enlever l'espace blanc
             document.getElementById('uploadMenu').style.display = 'none';
             
-            // 2. Mettre à jour le texte de la zone d'upload pour rassurer l'utilisateur
-            document.getElementById('uploadStatus').innerText = "⏳ Synchronisation de : " + file.name;
+            // 2. Met à jour directement le texte visuel
+            document.getElementById('uploadStatus').innerText = "✅ Sélectionné : " + file.name;
 
-            // 3. Envoyer vers ton Storage Supabase
-            const { data, error } = await supabase.storage
-                .from('products')
-                .upload(`public/${Date.now()}_${file.name}`, file);
+            // 3. Essai d'upload si Supabase est connecté
+            if (supabase && supabase.options.supabaseUrl !== 'URL') {
+                document.getElementById('uploadStatus').innerText = "⏳ Synchronisation de : " + file.name;
+                try {
+                    const { data, error } = await supabase.storage
+                        .from('products')
+                        .upload(`public/${Date.now()}_${file.name}`, file);
 
-            if (error) {
-                alert("Erreur d'upload : " + error.message);
-                document.getElementById('uploadStatus').innerText = "❌ Échec de l'upload. Réessayez.";
+                    if (error) {
+                        alert("Erreur d'upload Storage : " + error.message);
+                        document.getElementById('uploadStatus').innerText = "❌ Échec de la synchronisation.";
+                    } else {
+                        const { data: publicUrlData } = supabase.storage
+                            .from('products')
+                            .getPublicUrl(data.path);
+                        
+                        uploadedImageUrl = publicUrlData.publicUrl;
+                        document.getElementById('uploadStatus').innerText = "✅ Média synchronisé avec succès !";
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
             } else {
-                const { data: publicUrlData } = supabase.storage
-                    .from('products')
-                    .getPublicUrl(data.path);
-                
-                uploadedImageUrl = publicUrlData.publicUrl;
-                // Validation finale dans l'encadré
-                document.getElementById('uploadStatus').innerText = "✅ Média prêt : " + file.name;
+                // Mode démo local si tes clés ne sont pas encore mises
+                uploadedImageUrl = "local_demo_mode";
+                alert("Mode local : Image '" + file.name + "' acceptée (Pense à remplacer 'URL' et 'KEY' par tes identifiants Supabase pour l'envoi réel).");
             }
         }
 
-        // Écouteurs d'événements pour les boutons de sélection
+        // Écouteurs d'événements
         document.getElementById('cameraInput').onchange = (e) => processFile(e.target.files[0]);
         document.getElementById('galleryInput').onchange = (e) => processFile(e.target.files[0]);
         document.getElementById('fileInput').onchange = (e) => processFile(e.target.files[0]);
@@ -125,13 +140,15 @@
                 image_url: uploadedImageUrl
             };
 
-            const { error } = await supabase.from('products').insert([dataToSave]);
-            
-            if (error) {
-                alert("Erreur de base de données : " + error.message);
+            if (supabase && supabase.options.supabaseUrl !== 'URL') {
+                const { error } = await supabase.from('products').insert([dataToSave]);
+                if (error) alert("Erreur de base de données : " + error.message);
+                else {
+                    alert("Produit enregistré avec succès sur le Shadow Market !");
+                    location.reload();
+                }
             } else {
-                alert("Produit enregistré avec succès sur le Shadow Market !");
-                location.reload();
+                alert("Simulé : Produit prêt pour la base de données !\nNom: " + dataToSave.name);
             }
         };
     </script>
