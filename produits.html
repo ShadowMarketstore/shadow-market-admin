@@ -1,62 +1,62 @@
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-    // 1. Initialisation des constantes et du client Supabase
-    const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZimxjbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4';
-    
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mes Produits</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        .grid-row { display: grid; grid-template-columns: 80px 1fr 80px; border-bottom: 1px solid #333; padding: 10px; align-items: center; }
+        .img-cell { width: 50px; height: 50px; object-fit: cover; }
+        .error-msg { color: red; padding: 20px; }
+    </style>
+</head>
+<body>
 
-    // 2. Fonction principale de récupération et d'affichage
-    async function fetchProducts() {
-        const list = document.getElementById('product-list');
+    <div id="product-list">Chargement des données...</div>
+
+    <script>
+        // Initialisation du client Supabase
+        const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZimxjbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4';
         
-        // Indicateur de chargement
-        if (list) {
-            list.innerHTML = '<div style="padding: 20px; color: #00ffff;">Chargement des produits en cours...</div>';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function loadData() {
+            const container = document.getElementById('product-list');
+            
+            try {
+                // Requête pour récupérer les données
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('name, image_url, sales_count');
+
+                if (error) {
+                    console.error("Erreur API :", error);
+                    container.innerHTML = `<div class="error-msg">Erreur de connexion : ${error.message}</div>`;
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    container.innerHTML = '<div>Aucun produit trouvé.</div>';
+                    return;
+                }
+
+                // Génération du tableau
+                container.innerHTML = data.map(p => `
+                    <div class="grid-row">
+                        <div><img src="${p.image_url || ''}" class="img-cell" onerror="this.style.display='none'"></div>
+                        <div>${p.name || 'Sans nom'}</div>
+                        <div>${p.sales_count !== null ? p.sales_count : 0}</div>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                container.innerHTML = `<div class="error-msg">Erreur système : ${err.message}</div>`;
+            }
         }
 
-        try {
-            // Requête vers la table 'products'
-            const { data, error } = await supabase
-                .from('products')
-                .select('name, image_url, sales_count');
-
-            if (error) {
-                console.error("Erreur lors de la requête Supabase :", error);
-                if (list) list.innerHTML = `<div style="padding: 20px; color: red;">Erreur de chargement : ${error.message}</div>`;
-                return;
-            }
-
-            if (!data || data.length === 0) {
-                if (list) list.innerHTML = '<div style="padding: 20px;">Aucun article trouvé dans le stock.</div>';
-                return;
-            }
-
-            // Génération du tableau complet
-            const htmlContent = data.map(p => `
-                <div class="grid-row">
-                    <div class="cell">
-                        <img src="${p.image_url || ''}" class="img-cell" onerror="this.style.display='none'">
-                    </div>
-                    <div class="cell" style="justify-content: flex-start; padding-left: 10px;">
-                        ${p.name || 'Produit sans nom'}
-                    </div>
-                    <div class="cell">
-                        ${p.sales_count !== null ? p.sales_count : 0}
-                    </div>
-                </div>
-            `).join('');
-
-            if (list) {
-                list.innerHTML = htmlContent;
-            }
-
-        } catch (err) {
-            console.error("Erreur critique dans le script :", err);
-            if (list) list.innerHTML = `<div style="padding: 20px; color: red;">Une erreur imprévue est survenue.</div>`;
-        }
-    }
-
-    // 3. Exécution au chargement de la page
-    document.addEventListener('DOMContentLoaded', fetchProducts);
-</script>
+        // Exécution au chargement complet de la page
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
