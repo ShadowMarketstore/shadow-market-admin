@@ -2,17 +2,18 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Shadow Market - Ajout Pro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow Market - Panel Admin</title>
     <style>
         body { background: #050505; color: #00ffff; font-family: 'Courier New', Courier, monospace; padding: 10px; margin: 0; }
         .nav-bar { background: #111; padding: 15px; border-bottom: 2px solid #00ffff; display: flex; gap: 15px; margin-bottom: 20px; }
         .nav-bar a { color: white; text-decoration: none; font-size: 14px; }
-        .form-card { background: #111; padding: 20px; border: 1px solid #333; border-radius: 10px; }
+        .form-card { background: #111; padding: 20px; border: 1px solid #333; border-radius: 10px; max-width: 500px; margin: 0 auto; }
         
         /* Zone Média */
         .upload-zone { border: 2px dashed #00ffff; padding: 30px; text-align: center; color: #00ffff; cursor: pointer; margin-bottom: 20px; border-radius: 5px; }
 
-        /* Menu Options */
+        /* Menu Options Upload */
         #uploadMenu { display: none; margin-bottom: 20px; border: 1px solid #00ffff; padding: 5px; border-radius: 5px; }
         .menu-option {
             width: 100%; background: #000; border: 1px solid #00ffff; color: #00ffff;
@@ -21,7 +22,7 @@
         }
         .menu-option:hover { background: #00ffff; color: #000; }
 
-        /* Inputs invisibles mais actifs */
+        /* Inputs invisibles pour l'upload d'image */
         .hidden-input {
             position: absolute;
             top: 0; left: 0;
@@ -31,24 +32,25 @@
             pointer-events: none;
         }
 
-        input, textarea, select { width: 100%; background: #000; border: 1px solid #444; color: white; padding: 12px; margin-bottom: 10px; border-radius: 5px; box-sizing: border-box; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9em; }
+        input, textarea, select { width: 100%; background: #000; border: 1px solid #444; color: white; padding: 12px; margin-bottom: 15px; border-radius: 5px; box-sizing: border-box; font-family: sans-serif; }
         .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button#add-btn { background: #00ffff; color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 0 10px #00ffff; text-transform: uppercase; }
+        
+        button#add-btn { background: #00ffff; color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 0 10px #00ffff; text-transform: uppercase; font-family: 'Courier New', Courier, monospace; font-size: 1.1em; }
     </style>
 </head>
 <body>
 
     <nav class="nav-bar">
-        <a href="index.html">Accueil</a>
-        <a href="produits.html">Stock</a>
-        <a href="formulaire.html" style="color: #00ffff;">Ajouter</a>
+        <a href="index.html">Boutique</a>
+        <a href="formulaire.html" style="color: #00ffff;">Ajouter un Article</a>
     </nav>
 
-    <h1>Article</h1>
+    <h1 style="text-align: center; color: #00ffff;">Ajouter un Article</h1>
 
     <div class="form-card">
         <div class="upload-zone" onclick="document.getElementById('uploadMenu').style.display = 'block'" id="uploadZone">
-            <p id="uploadStatus">📷 Ajouter un média</p>
+            <p id="uploadStatus">📷 Ajouter un média (Image du module)</p>
         </div>
 
         <div id="uploadMenu">
@@ -61,17 +63,29 @@
         <input type="file" id="galleryInput" class="hidden-input" accept="image/*">
         <input type="file" id="fileInput" class="hidden-input" accept="image/*,application/*">
 
-        <input type="text" id="name" placeholder="Nom de l'article">
+        <label for="name">Nom de l'article :</label>
+        <input type="text" id="name" placeholder="Ex: Shadow_Code_Premium !">
         
+        <label for="desc">Description du module :</label>
+        <textarea id="desc" rows="4" placeholder="Ajoutez les détails ou instructions du produit..."></textarea>
+
         <div class="price-grid">
-            <input type="number" id="price" placeholder="Prix final" readonly style="background: #111; border-color: #222; color: #00ffff;">
-            <input type="number" id="old_price" placeholder="Prix d'origine">
+            <div>
+                <label for="old_price">Prix de base (EUR) :</label>
+                <input type="number" id="old_price" placeholder="Ex: 25.00" step="0.01">
+            </div>
+            <div>
+                <label for="price">Prix final calculé (EUR) :</label>
+                <input type="number" id="price" placeholder="Prix après remise" readonly style="background: #111; border-color: #222; color: #00ffff;">
+            </div>
         </div>
 
-        <input type="number" id="stock" placeholder="Quantité en stock" min="0" value="1">
+        <label for="stock">Quantité en stock :</label>
+        <input type="number" id="stock" placeholder="Quantité disponible" min="0" value="1">
 
+        <label for="discount">Appliquer une réduction :</label>
         <select id="discount">
-            <option value="0">Sélectionner une réduction (Aucune : 0%)</option>
+            <option value="0">Aucune réduction (0%)</option>
             <option value="5">-5%</option>
             <option value="10">-10%</option>
             <option value="15">-15%</option>
@@ -79,17 +93,15 @@
             <option value="30">-30%</option>
             <option value="50">-50%</option>
         </select>
-
-        <textarea id="desc" rows="4" placeholder="Ajoutez une description"></textarea>
         
+        <label for="ribbon">Badge / Ruban d'affichage :</label>
         <select id="ribbon">
-            <option value="">Ruban (ex: Promo, Nouveauté)</option>
-            <option value="promo">Promo</option>
-            <option value="nouveau">Nouveauté</option>
-            <option value="edition_limitee">Édition Limitée</option>
+            <option value="">Aucun Badge</option>
+            <option value="new">NEW (Nouveauté)</option>
+            <option value="promo">PROMO (Réduction)</option>
         </select>
         
-        <button id="add-btn">Enregistrer</button>
+        <button id="add-btn">Enregistrer le produit</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -100,20 +112,21 @@
         const supabaseUrl = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
         const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4'.trim();
 
-        // Initialisation du client Supabase
         try {
             if (typeof supabase !== 'undefined') {
                 supabaseClient = supabase.createClient(supabaseUrl, apiKey);
             }
         } catch (e) {
-            console.error("Erreur d'initialisation : ", e);
+            console.error("Erreur d'initialisation Supabase : ", e);
         }
         
+        // Gestion de la synchronisation du stockage d'images (Storage Bucket)
         async function processFile(file) {
             if (!file) return;
 
             document.getElementById('uploadMenu').style.display = 'none';
-            document.getElementById('uploadStatus').innerText = "⏳ Synchronisation de : " + file.name;
+            document.getElementById('uploadStatus').style.color = '#00ffff';
+            document.getElementById('uploadStatus').innerText = "⏳ Envoi de l'image : " + file.name;
 
             const filePath = `public/${Date.now()}_${file.name}`;
             const uploadUrl = `${supabaseUrl}/storage/v1/object/products/${filePath}`;
@@ -131,15 +144,17 @@
 
                 if (response.ok) {
                     uploadedImageUrl = `${supabaseUrl}/storage/v1/object/public/products/${filePath}`;
-                    document.getElementById('uploadStatus').innerText = "✅ En ligne : " + file.name;
+                    document.getElementById('uploadStatus').style.color = '#00ff00';
+                    document.getElementById('uploadStatus').innerText = "✅ Image liée avec succès !";
                 } else {
                     const errData = await response.json();
-                    alert("Erreur Supabase Storage : " + (errData.message || response.statusText));
-                    document.getElementById('uploadStatus').innerText = "❌ Échec de l'envoi.";
+                    alert("Erreur de stockage : " + (errData.message || response.statusText));
+                    document.getElementById('uploadStatus').style.color = '#ff3333';
+                    document.getElementById('uploadStatus').innerText = "❌ Échec de l'envoi de la photo.";
                 }
             } catch (err) {
                 console.error(err);
-                document.getElementById('uploadStatus').innerText = "❌ Erreur réseau.";
+                document.getElementById('uploadStatus').innerText = "❌ Erreur de réseau média.";
             }
         }
 
@@ -147,7 +162,7 @@
         document.getElementById('galleryInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
         document.getElementById('fileInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
 
-        // Calcul automatique
+        // Calcul automatique du prix final selon le pourcentage sélectionné
         function recalculerPrixFinal() {
             const prixOrigine = parseFloat(document.getElementById('old_price').value) || 0;
             const reduction = parseInt(document.getElementById('discount').value) || 0;
@@ -159,9 +174,11 @@
         document.getElementById('old_price').addEventListener('input', recalculerPrixFinal);
         document.getElementById('discount').addEventListener('change', recalculerPrixFinal);
 
+        // Envoi final des données nettoyées vers Supabase
         document.getElementById('add-btn').onclick = async () => {
-            if (!uploadedImageUrl) {
-                alert("Veuillez d'abord ajouter une image.");
+            const nameField = document.getElementById('name').value.trim();
+            if (!nameField) {
+                alert("Donne un nom à ton article avant de valider.");
                 return;
             }
 
@@ -170,29 +187,29 @@
             const prixFinal = parseFloat(document.getElementById('price').value) || prixOrigine;
             const quantiteStock = parseInt(document.getElementById('stock').value) || 0;
 
-            // Envoi des données avec les noms de colonnes sécurisés et vérifiés
+            // Alignement strict avec le schéma de ta table Supabase
             const dataToSave = {
-                name: document.getElementById('name').value,
+                name: nameField,
                 price: prixFinal,                 
                 old_price: prixOrigine,           
-                discount: reduction, // Changé ici pour correspondre aux structures standards Supabase
-                stock_quantity: quantiteStock,     
+                discount: reduction,             
+                stock_quantity: quantiteStock, // SYNCHRONISÉ : Fini l'erreur de cache sur la colonne 'stock' !
                 description: document.getElementById('desc').value,
                 ribbon: document.getElementById('ribbon').value,
-                image_url: uploadedImageUrl
+                image_url: uploadedImageUrl || null
             };
 
             if (supabaseClient) {
                 const { error } = await supabaseClient.from('products').insert([dataToSave]);
                 if (error) {
-                    console.error("Détails erreur Supabase :", error);
-                    alert("Erreur Base de données : " + error.message + " (Vérifie si la colonne 'discount' ou 'stock_quantity' existe bien)");
+                    console.error("Détails de l'erreur :", error);
+                    alert("Erreur Base de données : " + error.message);
                 } else {
-                    alert("Produit enregistré avec succès sur le Shadow Market !");
+                    alert("Module Shadow Market enregistré et synchronisé en direct !");
                     location.reload();
                 }
             } else {
-                alert("Le client Supabase n'est pas prêt.");
+                alert("Erreur de communication : Client Supabase inaccessible.");
             }
         };
     </script>
