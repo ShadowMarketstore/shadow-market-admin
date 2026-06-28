@@ -12,7 +12,7 @@
         
         .my-table {
             display: grid;
-            grid-template-columns: 80px 1fr 70px;
+            grid-template-columns: 80px 1fr 100px;
             width: 100%;
             border: 1px solid #333;
         }
@@ -24,12 +24,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 40px;
+            min-height: 50px;
             font-size: 13px;
         }
         
         .header { background-color: #1a1a1a; font-weight: bold; color: #00ffff; }
-        .product-img { width: 50px; height: 30px; background: #333; border-radius: 2px; object-fit: cover; }
+        .product-img { width: 50px; height: 40px; background: #333; border-radius: 4px; object-fit: cover; }
     </style>
 </head>
 <body>
@@ -46,15 +46,16 @@
         <div class="my-table">
             <div class="cell header">Image</div>
             <div class="cell header">NOM PRODUCT</div>
-            <div class="cell header">Stock</div> <div id="product-container" style="display: contents;">
-                <div class="cell" style="grid-column: span 3; justify-content: center;">Chargement...</div>
+            <div class="cell header">Stock</div>
+
+            <div id="product-container" style="display: contents;">
+                <div class="cell" style="grid-column: span 3;">Chargement en cours...</div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Initialisation avec ta clé publique
         const supabase = supabase.createClient(
             'https://jsuvimxjmjiljntmgbzu.supabase.co', 
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZimxjbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4'
@@ -63,30 +64,26 @@
         async function loadData() {
             const container = document.getElementById('product-container');
             
-            try {
-                // On récupère les colonnes existantes dans ta table 'products'
-                const { data, error } = await supabase
-                    .from('products')
-                    .select('name, image_url, stock_quantity');
-                
-                if (error) throw error;
+            // Appel vers la table 'products'
+            const { data, error } = await supabase
+                .from('products')
+                .select('name, image_url, stock_quantity');
+            
+            if (error) {
+                container.innerHTML = `<div class="cell" style="grid-column: span 3; color: red;">Erreur: ${error.message}</div>`;
+                return;
+            }
 
-                if (data && data.length > 0) {
-                    container.innerHTML = data.map(p => `
-                        <div class="cell"><img src="${p.image_url || ''}" class="product-img" onerror="this.style.display='none'"></div>
-                        <div class="cell" style="justify-content: flex-start;">${p.name || 'Produit'}</div>
-                        <div class="cell">${p.stock_quantity || 0}</div>
-                    `).join('');
-                } else {
-                    container.innerHTML = `<div class="cell" style="grid-column: span 3;">Aucun produit trouvé.</div>`;
-                }
-            } catch (err) {
-                console.error(err);
-                container.innerHTML = `<div class="cell" style="grid-column: span 3; color: red;">Erreur de connexion.</div>`;
+            if (data && data.length > 0) {
+                container.innerHTML = data.map(p => `
+                    <div class="cell"><img src="${p.image_url || ''}" class="product-img" onerror="this.style.display='none'"></div>
+                    <div class="cell" style="justify-content: flex-start;">${p.name || 'Produit'}</div>
+                    <div class="cell">${p.stock_quantity > 0 ? 'En stock' : 'Rupture'}</div>
+                `).join('');
+            } else {
+                container.innerHTML = `<div class="cell" style="grid-column: span 3;">Aucun produit trouvé.</div>`;
             }
         }
-
-        // Lancement de la récupération des données
         loadData();
     </script>
 </body>
