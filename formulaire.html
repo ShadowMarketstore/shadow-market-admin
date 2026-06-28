@@ -147,18 +147,15 @@
         document.getElementById('galleryInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
         document.getElementById('fileInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
 
-        // ALGORITHME : Calcul automatique en direct du prix final selon la réduction choisie
+        // Calcul automatique en direct du prix final selon la réduction
         function recalculerPrixFinal() {
             const prixOrigine = parseFloat(document.getElementById('old_price').value) || 0;
             const reduction = parseInt(document.getElementById('discount').value) || 0;
             
             const prixCalcule = prixOrigine * (1 - reduction / 100);
-            
-            // On affiche le résultat arrondi dans le champ de gauche
             document.getElementById('price').value = prixCalcule.toFixed(2);
         }
 
-        // Écouteurs pour mettre à jour le prix dès qu'on tape un prix ou qu'on change la promo
         document.getElementById('old_price').addEventListener('input', recalculerPrixFinal);
         document.getElementById('discount').addEventListener('change', recalculerPrixFinal);
 
@@ -173,12 +170,13 @@
             const prixFinal = parseFloat(document.getElementById('price').value) || prixOrigine;
             const quantiteStock = parseInt(document.getElementById('stock').value) || 0;
 
+            // Mapping exact avec les colonnes de ta table Supabase
             const dataToSave = {
                 name: document.getElementById('name').value,
-                price: prixFinal,                 // Prix final calculé avec réduction
-                old_price: prixOrigine,           // Prix d'origine enregistré
-                discount: reduction,              // Le pourcentage de réduction stocké
-                stock: quantiteStock,             // Le nombre d'articles en stock
+                price: prixFinal,                         // Prix final calculé
+                old_price: prixOrigine,                   // Prix avant réduction
+                discount_price: reduction,                // CORRIGÉ : Nom exact de ta colonne de réduction
+                stock_quantity: quantiteStock,             // CORRIGÉ : Nom exact de ta colonne de stock
                 description: document.getElementById('desc').value,
                 ribbon: document.getElementById('ribbon').value,
                 image_url: uploadedImageUrl
