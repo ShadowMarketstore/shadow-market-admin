@@ -21,8 +21,15 @@
         }
         .menu-option:hover { background: #00ffff; color: #000; }
 
-        /* Inputs masqués */
-        .hidden-input { display: none !important; }
+        /* Astuce technique pour les mobiles : invisible mais détectable */
+        .hidden-input {
+            position: absolute;
+            top: 0; left: 0;
+            width: 1px; height: 1px;
+            opacity: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
 
         input, textarea, select { width: 100%; background: #000; border: 1px solid #444; color: white; padding: 12px; margin-bottom: 10px; border-radius: 5px; box-sizing: border-box; }
         .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -52,7 +59,7 @@
 
         <input type="file" id="cameraInput" class="hidden-input" capture="environment" accept="image/*">
         <input type="file" id="galleryInput" class="hidden-input" accept="image/*">
-        <input type="file" id="fileInput" class="hidden-input" accept="*/*">
+        <input type="file" id="fileInput" class="hidden-input" accept="image/*,application/*">
 
         <input type="text" id="name" placeholder="Nom de l'article">
         <div class="price-grid">
@@ -73,24 +80,24 @@
         let supabase = null;
         let uploadedImageUrl = "";
 
-        // Initialisation sécurisée pour éviter de faire planter le code entier si les clés manquent
         try {
+            // Remplace par tes vrais identifiants si tu veux tester la liaison réelle
             supabase = supabase.createClient('URL', 'KEY');
         } catch (e) {
-            console.log("Supabase non configuré ou clés manquantes.");
+            console.log("Supabase indisponible pour l'instant");
         }
         
-        // Fonction de traitement et de fermeture du menu
+        // Fonction globale appelée immédiatement après le choix du fichier
         async function processFile(file) {
             if (!file) return;
 
-            // 1. Ferme instantanément le menu pour nettoyer l'interface et enlever l'espace blanc
+            // Masque le menu de sélection sur le champ visuel
             document.getElementById('uploadMenu').style.display = 'none';
             
-            // 2. Met à jour directement le texte visuel
+            // Met à jour l'encadré
             document.getElementById('uploadStatus').innerText = "✅ Sélectionné : " + file.name;
 
-            // 3. Essai d'upload si Supabase est connecté
+            // Vérification de la configuration Supabase
             if (supabase && supabase.options.supabaseUrl !== 'URL') {
                 document.getElementById('uploadStatus').innerText = "⏳ Synchronisation de : " + file.name;
                 try {
@@ -99,7 +106,7 @@
                         .upload(`public/${Date.now()}_${file.name}`, file);
 
                     if (error) {
-                        alert("Erreur d'upload Storage : " + error.message);
+                        alert("Erreur Supabase : " + error.message);
                         document.getElementById('uploadStatus').innerText = "❌ Échec de la synchronisation.";
                     } else {
                         const { data: publicUrlData } = supabase.storage
@@ -107,24 +114,24 @@
                             .getPublicUrl(data.path);
                         
                         uploadedImageUrl = publicUrlData.publicUrl;
-                        document.getElementById('uploadStatus').innerText = "✅ Média synchronisé avec succès !";
+                        document.getElementById('uploadStatus').innerText = "✅ Média synchronisé !";
                     }
                 } catch (err) {
                     console.error(err);
                 }
             } else {
-                // Mode démo local si tes clés ne sont pas encore mises
-                uploadedImageUrl = "local_demo_mode";
-                alert("Mode local : Image '" + file.name + "' acceptée (Pense à remplacer 'URL' et 'KEY' par tes identifiants Supabase pour l'envoi réel).");
+                // Mode démonstration locale si les clés d'API sont par défaut
+                uploadedImageUrl = "demo_mode_active";
+                alert("Mode Simulation local actif !\nFichier pris en compte : " + file.name);
             }
         }
 
-        // Écouteurs d'événements
-        document.getElementById('cameraInput').onchange = (e) => processFile(e.target.files[0]);
-        document.getElementById('galleryInput').onchange = (e) => processFile(e.target.files[0]);
-        document.getElementById('fileInput').onchange = (e) => processFile(e.target.files[0]);
+        // Configuration des événements natifs de changement
+        document.getElementById('cameraInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
+        document.getElementById('galleryInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
+        document.getElementById('fileInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
 
-        // Enregistrement global du produit
+        // Bouton d'enregistrement global
         document.getElementById('add-btn').onclick = async () => {
             if (!uploadedImageUrl) {
                 alert("Erreur : Veuillez d'abord ajouter un média avant d'enregistrer.");
@@ -142,13 +149,13 @@
 
             if (supabase && supabase.options.supabaseUrl !== 'URL') {
                 const { error } = await supabase.from('products').insert([dataToSave]);
-                if (error) alert("Erreur de base de données : " + error.message);
+                if (error) alert("Erreur database : " + error.message);
                 else {
-                    alert("Produit enregistré avec succès sur le Shadow Market !");
+                    alert("Produit enregistré avec succès !");
                     location.reload();
                 }
             } else {
-                alert("Simulé : Produit prêt pour la base de données !\nNom: " + dataToSave.name);
+                alert("Simulé en local : Produit prêt !\nNom : " + dataToSave.name + "\nStatut : En attente des clés Supabase.");
             }
         };
     </script>
