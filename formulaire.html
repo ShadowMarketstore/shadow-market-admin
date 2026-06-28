@@ -80,38 +80,35 @@
         let supabaseClient = null;
         let uploadedImageUrl = "";
 
-        // Initialisation sans écraser l'objet global 'supabase'
+        // Initialisation avec tes vrais accès du Shadow Market
         try {
-            // Remplace par tes vrais identifiants quand tu es prêt pour le cloud
             if (typeof supabase !== 'undefined') {
-                supabaseClient = supabase.createClient('URL', 'KEY');
+                supabaseClient = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', 'Sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX');
             }
         } catch (e) {
-            console.log("Supabase en attente de configuration.");
+            console.error("Erreur de connexion initiale à Supabase : ", e);
         }
         
-        // Cette fonction s'exécute QUOI QU'IL ARRIVE dès qu'un fichier est choisi
+        // Fonction globale appelée dès qu'un média est choisi
         async function processFile(file) {
             if (!file) return;
 
-            // 1. On cache TOUT DE SUITE le menu pour libérer l'espace visuel
+            // Masque immédiatement le menu pour nettoyer l'interface
             document.getElementById('uploadMenu').style.display = 'none';
-            
-            // 2. On change immédiatement le texte de l'encadré
-            document.getElementById('uploadStatus').innerText = "✅ Sélectionné : " + file.name;
+            document.getElementById('uploadStatus').innerText = "⏳ Synchronisation de : " + file.name;
 
-            // 3. Mode Upload ou Mode Démo
-            if (supabaseClient && supabaseClient.supabaseUrl !== 'URL') {
-                document.getElementById('uploadStatus').innerText = "⏳ Synchronisation de : " + file.name;
+            if (supabaseClient) {
                 try {
+                    // Upload du fichier dans le bucket 'products'
                     const { data, error } = await supabaseClient.storage
                         .from('products')
                         .upload(`public/${Date.now()}_${file.name}`, file);
 
                     if (error) {
-                        alert("Erreur stockage : " + error.message);
+                        alert("Erreur stockage Supabase : " + error.message);
                         document.getElementById('uploadStatus').innerText = "❌ Échec de l'envoi.";
                     } else {
+                        // Récupération de l'URL publique générée
                         const { data: publicUrlData } = supabaseClient.storage
                             .from('products')
                             .getPublicUrl(data.path);
@@ -121,23 +118,22 @@
                     }
                 } catch (err) {
                     console.error(err);
+                    document.getElementById('uploadStatus').innerText = "❌ Erreur système d'upload.";
                 }
             } else {
-                // Si les clés 'URL' et 'KEY' ne sont pas modifiées, on simule pour laisser l'interface fluide
-                uploadedImageUrl = "demo_url_active";
-                alert("Sélection locale réussie : " + file.name + "\n(Le menu s'est fermé et l'affichage est mis à jour !)");
+                alert("Supabase n'est pas initialisé correctement.");
             }
         }
 
-        // Liaison propre des écouteurs
+        // Liaison des écouteurs de fichiers
         document.getElementById('cameraInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
         document.getElementById('galleryInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
         document.getElementById('fileInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
 
-        // Gestion du bouton Enregistrer
+        // Gestion du clic sur Enregistrer
         document.getElementById('add-btn').onclick = async () => {
             if (!uploadedImageUrl) {
-                alert("Veuillez d'abord sélectionner un média.");
+                alert("Veuillez d'abord uploader un média avant d'enregistrer.");
                 return;
             }
 
@@ -150,15 +146,14 @@
                 image_url: uploadedImageUrl
             };
 
-            if (supabaseClient && supabaseClient.supabaseUrl !== 'URL') {
+            if (supabaseClient) {
                 const { error } = await supabaseClient.from('products').insert([dataToSave]);
-                if (error) alert("Erreur BDD : " + error.message);
-                else {
-                    alert("Produit enregistré !");
-                    location.reload();
+                if (error) {
+                    alert("Erreur base de données : " + error.message);
+                } else {
+                    alert("Produit enregistré avec succès sur le Shadow Market !");
+                    location.reload(); // Actualise pour vider le formulaire
                 }
-            } else {
-                alert("Simulé : Produit prêt à être inséré !\nNom : " + dataToSave.name);
             }
         };
     </script>
