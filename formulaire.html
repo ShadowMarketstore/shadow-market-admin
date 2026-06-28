@@ -80,35 +80,35 @@
         let supabaseClient = null;
         let uploadedImageUrl = "";
 
-        // Initialisation avec tes vrais accès du Shadow Market
+        // Initialisation avec tes connexions réelles et validées
         try {
             if (typeof supabase !== 'undefined') {
-                supabaseClient = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', 'Sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX');
+                supabaseClient = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4');
             }
         } catch (e) {
-            console.error("Erreur de connexion initiale à Supabase : ", e);
+            console.error("Erreur d'initialisation : ", e);
         }
         
-        // Fonction globale appelée dès qu'un média est choisi
+        // Traitement automatique du fichier sélectionné
         async function processFile(file) {
             if (!file) return;
 
-            // Masque immédiatement le menu pour nettoyer l'interface
+            // On cache instantanément les boutons du menu
             document.getElementById('uploadMenu').style.display = 'none';
             document.getElementById('uploadStatus').innerText = "⏳ Synchronisation de : " + file.name;
 
             if (supabaseClient) {
                 try {
-                    // Upload du fichier dans le bucket 'products'
+                    // Upload direct vers ton bucket 'products'
                     const { data, error } = await supabaseClient.storage
                         .from('products')
                         .upload(`public/${Date.now()}_${file.name}`, file);
 
                     if (error) {
-                        alert("Erreur stockage Supabase : " + error.message);
+                        alert("Erreur Stockage : " + error.message);
                         document.getElementById('uploadStatus').innerText = "❌ Échec de l'envoi.";
                     } else {
-                        // Récupération de l'URL publique générée
+                        // Génération du lien de l'image
                         const { data: publicUrlData } = supabaseClient.storage
                             .from('products')
                             .getPublicUrl(data.path);
@@ -118,22 +118,20 @@
                     }
                 } catch (err) {
                     console.error(err);
-                    document.getElementById('uploadStatus').innerText = "❌ Erreur système d'upload.";
+                    document.getElementById('uploadStatus').innerText = "❌ Erreur système.";
                 }
-            } else {
-                alert("Supabase n'est pas initialisé correctement.");
             }
         }
 
-        // Liaison des écouteurs de fichiers
+        // Configuration des boutons mobiles
         document.getElementById('cameraInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
         document.getElementById('galleryInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
         document.getElementById('fileInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
 
-        // Gestion du clic sur Enregistrer
+        // Envoi final des données de l'article
         document.getElementById('add-btn').onclick = async () => {
             if (!uploadedImageUrl) {
-                alert("Veuillez d'abord uploader un média avant d'enregistrer.");
+                alert("Veuillez d'abord ajouter une image.");
                 return;
             }
 
@@ -149,10 +147,10 @@
             if (supabaseClient) {
                 const { error } = await supabaseClient.from('products').insert([dataToSave]);
                 if (error) {
-                    alert("Erreur base de données : " + error.message);
+                    alert("Erreur Base de données : " + error.message);
                 } else {
                     alert("Produit enregistré avec succès sur le Shadow Market !");
-                    location.reload(); // Actualise pour vider le formulaire
+                    location.reload();
                 }
             }
         };
