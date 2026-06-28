@@ -40,8 +40,8 @@
     <h1>Article</h1>
 
     <div class="form-card">
-        <div class="upload-zone" onclick="document.getElementById('uploadMenu').style.display = 'block'">
-            <p>📷 Ajouter un média</p>
+        <div class="upload-zone" onclick="document.getElementById('uploadMenu').style.display = 'block'" id="uploadZone">
+            <p id="uploadStatus">📷 Ajouter un média</p>
         </div>
 
         <div id="uploadMenu">
@@ -70,40 +70,46 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Remplace par tes vraies clés Supabase
+        // Configuration de ton client Supabase (remplace par tes accès si nécessaire)
         const supabase = supabase.createClient('URL', 'KEY');
         
         let uploadedImageUrl = "";
 
-        // Fonction unique de traitement du fichier sélectionné
+        // Fonction de traitement et de fermeture du menu
         async function processFile(file) {
             if (!file) return;
 
-            alert("Upload en cours vers Supabase...");
+            // 1. Fermer immédiatement le menu pour supprimer l'espace blanc gênant
+            document.getElementById('uploadMenu').style.display = 'none';
+            
+            // 2. Mettre à jour le texte de la zone d'upload pour rassurer l'utilisateur
+            document.getElementById('uploadStatus').innerText = "⏳ Synchronisation de : " + file.name;
 
+            // 3. Envoyer vers ton Storage Supabase
             const { data, error } = await supabase.storage
                 .from('products')
                 .upload(`public/${Date.now()}_${file.name}`, file);
 
             if (error) {
                 alert("Erreur d'upload : " + error.message);
+                document.getElementById('uploadStatus').innerText = "❌ Échec de l'upload. Réessayez.";
             } else {
                 const { data: publicUrlData } = supabase.storage
                     .from('products')
                     .getPublicUrl(data.path);
                 
                 uploadedImageUrl = publicUrlData.publicUrl;
-                alert("Image synchronisée avec succès !");
-                document.getElementById('uploadMenu').style.display = 'none'; // Ferme le menu
+                // Validation finale dans l'encadré
+                document.getElementById('uploadStatus').innerText = "✅ Média prêt : " + file.name;
             }
         }
 
-        // Liaison des écouteurs de changement directement sur les inputs fixes
+        // Écouteurs d'événements pour les boutons de sélection
         document.getElementById('cameraInput').onchange = (e) => processFile(e.target.files[0]);
         document.getElementById('galleryInput').onchange = (e) => processFile(e.target.files[0]);
         document.getElementById('fileInput').onchange = (e) => processFile(e.target.files[0]);
 
-        // Enregistrement final du produit
+        // Enregistrement global du produit
         document.getElementById('add-btn').onclick = async () => {
             if (!uploadedImageUrl) {
                 alert("Erreur : Veuillez d'abord ajouter un média avant d'enregistrer.");
