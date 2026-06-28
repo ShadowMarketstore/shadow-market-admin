@@ -17,9 +17,12 @@
         .menu-option {
             width: 100%; background: #000; border: 1px solid #00ffff; color: #00ffff;
             padding: 12px; margin-bottom: 5px; cursor: pointer; text-align: center; display: block;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Courier New', Courier, monospace; font-weight: bold;
         }
         .menu-option:hover { background: #00ffff; color: #000; }
+
+        /* Inputs masqués */
+        .hidden-input { display: none !important; }
 
         input, textarea, select { width: 100%; background: #000; border: 1px solid #444; color: white; padding: 12px; margin-bottom: 10px; border-radius: 5px; box-sizing: border-box; }
         .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -42,10 +45,14 @@
         </div>
 
         <div id="uploadMenu">
-            <button type="button" class="menu-option" onclick="handleUpload('camera')">Prendre une photo</button>
-            <button type="button" class="menu-option" onclick="handleUpload('gallery')">Prendre dans la galerie</button>
-            <button type="button" class="menu-option" onclick="handleUpload('file')">Sélectionner un fichier</button>
+            <button type="button" class="menu-option" onclick="document.getElementById('cameraInput').click()">Prendre une photo</button>
+            <button type="button" class="menu-option" onclick="document.getElementById('galleryInput').click()">Prendre dans la galerie</button>
+            <button type="button" class="menu-option" onclick="document.getElementById('fileInput').click()">Sélectionner un fichier</button>
         </div>
+
+        <input type="file" id="cameraInput" class="hidden-input" capture="environment" accept="image/*">
+        <input type="file" id="galleryInput" class="hidden-input" accept="image/*">
+        <input type="file" id="fileInput" class="hidden-input" accept="*/*">
 
         <input type="text" id="name" placeholder="Nom de l'article">
         <div class="price-grid">
@@ -66,48 +73,37 @@
         // Remplace par tes vraies clés Supabase
         const supabase = supabase.createClient('URL', 'KEY');
         
-        // Variable pour stocker le lien de l'image après upload
         let uploadedImageUrl = "";
 
-        async function handleUpload(type) {
-            const input = document.createElement('input');
-            input.type = 'file';
-            
-            if (type === 'camera') {
-                input.setAttribute('capture', 'environment');
-                input.setAttribute('accept', 'image/*');
-            } else if (type === 'gallery') {
-                input.setAttribute('accept', 'image/*');
-            }
+        // Fonction unique de traitement du fichier sélectionné
+        async function processFile(file) {
+            if (!file) return;
 
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
+            alert("Upload en cours vers Supabase...");
 
-                alert("Upload en cours vers Supabase...");
+            const { data, error } = await supabase.storage
+                .from('products')
+                .upload(`public/${Date.now()}_${file.name}`, file);
 
-                // Envoi du fichier dans ton Bucket 'products'
-                const { data, error } = await supabase.storage
+            if (error) {
+                alert("Erreur d'upload : " + error.message);
+            } else {
+                const { data: publicUrlData } = supabase.storage
                     .from('products')
-                    .upload(`public/${Date.now()}_${file.name}`, file);
-
-                if (error) {
-                    alert("Erreur d'upload : " + error.message);
-                } else {
-                    // On récupère l'URL d'accès public
-                    const { data: publicUrlData } = supabase.storage
-                        .from('products')
-                        .getPublicUrl(data.path);
-                    
-                    uploadedImageUrl = publicUrlData.publicUrl;
-                    alert("Image synchronisée avec succès !");
-                    document.getElementById('uploadMenu').style.display = 'none'; // Ferme le menu
-                }
-            };
-            input.click();
+                    .getPublicUrl(data.path);
+                
+                uploadedImageUrl = publicUrlData.publicUrl;
+                alert("Image synchronisée avec succès !");
+                document.getElementById('uploadMenu').style.display = 'none'; // Ferme le menu
+            }
         }
 
-        // Enregistrement final du produit dans la table database
+        // Liaison des écouteurs de changement directement sur les inputs fixes
+        document.getElementById('cameraInput').onchange = (e) => processFile(e.target.files[0]);
+        document.getElementById('galleryInput').onchange = (e) => processFile(e.target.files[0]);
+        document.getElementById('fileInput').onchange = (e) => processFile(e.target.files[0]);
+
+        // Enregistrement final du produit
         document.getElementById('add-btn').onclick = async () => {
             if (!uploadedImageUrl) {
                 alert("Erreur : Veuillez d'abord ajouter un média avant d'enregistrer.");
@@ -120,7 +116,7 @@
                 old_price: document.getElementById('old_price').value,
                 description: document.getElementById('desc').value,
                 ribbon: document.getElementById('ribbon').value,
-                image_url: uploadedImageUrl // Envoi de l'URL obtenue
+                image_url: uploadedImageUrl
             };
 
             const { error } = await supabase.from('products').insert([dataToSave]);
@@ -129,9 +125,10 @@
                 alert("Erreur de base de données : " + error.message);
             } else {
                 alert("Produit enregistré avec succès sur le Shadow Market !");
-                location.reload(); // Reset le formulaire
+                location.reload();
             }
         };
     </script>
 </body>
 </html>
+
