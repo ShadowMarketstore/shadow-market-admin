@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Shadow Market - Produits</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 20px; }
+        h1 { color: #00ffff; border-bottom: 1px solid #00ffff; padding-bottom: 10px; }
+        
+        .product-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+        .product-card { 
+            display: grid; 
+            grid-template-columns: 80px 1fr 100px; 
+            align-items: center; 
+            background: #1a1a1a; 
+            padding: 10px; 
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+        .img-placeholder { width: 60px; height: 60px; background: #333; border-radius: 4px; }
+        .sales-count { text-align: right; color: #00ffff; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Mes Produits</h1>
+    <div class="product-list" id="productList">
+        </div>
+</body>
+</html>
+
