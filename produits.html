@@ -3,52 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shadow Market - Produits</title>
+    <title>Shadow Market - Debug</title>
     <style>
         body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 0; margin: 0; }
-        h1 { color: #00ffff; padding: 20px 20px 10px 20px; margin: 0; font-size: 22px; border-bottom: 2px solid #00ffff; }
-
-        /* Conteneur principal */
-        .wrapper { width: 100%; padding: 20px; box-sizing: border-box; }
-
-        /* Le Tableau - Structure fixe */
+        h1 { color: #00ffff; padding: 20px; margin: 0; font-size: 20px; border-bottom: 2px solid #00ffff; }
+        
+        .wrapper { width: 100%; padding: 10px; box-sizing: border-box; }
+        
+        /* Grille forcé */
         .my-table {
             display: grid;
             grid-template-columns: 80px 1fr 70px;
             width: 100%;
-            border: 2px solid #333; /* Bordure extérieure épaisse */
+            border: 1px solid #333;
         }
-
-        /* Les cellules du tableau */
+        
         .cell {
-            padding: 15px 10px;
+            padding: 12px 5px;
             border-bottom: 1px solid #333;
             border-right: 1px solid #333;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 50px;
+            min-height: 40px;
+            font-size: 13px;
         }
-
-        /* En-têtes */
-        .header {
-            background-color: #1a1a1a;
-            font-weight: bold;
-            color: #00ffff;
-            text-transform: uppercase;
-        }
-
-        /* Styles produits */
-        .product-img { width: 60px; height: 40px; background: #333; border-radius: 4px; object-fit: cover; }
-        .sales { color: #ffffff; font-weight: bold; }
+        
+        .header { background-color: #1a1a1a; font-weight: bold; color: #00ffff; }
+        .product-img { width: 50px; height: 30px; background: #333; border-radius: 2px; }
     </style>
 </head>
 <body>
-
     <h1>Mes Produits</h1>
-
     <div class="wrapper">
-        <div class="my-table" id="table">
+        <div class="my-table">
             <div class="cell header">Image</div>
             <div class="cell header">NOM PRODUCT</div>
             <div class="cell header">Ventes</div>
@@ -66,20 +54,27 @@
         );
 
         async function loadData() {
-            const { data } = await supabase.from('products').select('*');
             const container = document.getElementById('product-container');
+            
+            // 1. Essayer de récupérer les données
+            const { data, error } = await supabase.from('products').select('*');
+            
+            if (error) {
+                container.innerHTML = `<div class="cell" style="grid-column: span 3; color: red;">Erreur: ${error.message}</div>`;
+                return;
+            }
 
             if (data && data.length > 0) {
                 container.innerHTML = data.map(p => `
                     <div class="cell"><img src="${p.image_url || ''}" class="product-img"></div>
-                    <div class="cell" style="justify-content: flex-start;">${p.name || p.nom || 'Sans nom'}</div>
-                    <div class="cell sales">${p.sales_count || p.ventes || 0}</div>
+                    <div class="cell" style="justify-content: flex-start;">${p.name || 'Produit test'}</div>
+                    <div class="cell">${p.sales_count || 0}</div>
                 `).join('');
             } else {
-                // Lignes vides pour remplir le tableau si pas de produit
+                // 2. Lignes de test si la base est vide
                 container.innerHTML = `
-                    <div class="cell"></div><div class="cell"></div><div class="cell"></div>
-                    <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+                    <div class="cell"><div class="product-img"></div></div><div class="cell">Produit Exemple 1</div><div class="cell">5</div>
+                    <div class="cell"><div class="product-img"></div></div><div class="cell">Produit Exemple 2</div><div class="cell">12</div>
                 `;
             }
         }
