@@ -82,11 +82,12 @@
 
         const supabaseUrl = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
         
-        // METS TA CLE NEUVE ET PROPRE ICI SANS ESPACES
-        const apiKey = 'COLLE_LA_LONGUE_CLE_ANON_ICI'.trim();
+        // Ta clé est maintenant parfaitement intégrée ici
+        const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4'.trim();
 
+        // Initialisation du client Supabase
         try {
-            if (typeof supabase !== 'undefined' && apiKey !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4') {
+            if (typeof supabase !== 'undefined') {
                 supabaseClient = supabase.createClient(supabaseUrl, apiKey);
             }
         } catch (e) {
@@ -155,7 +156,7 @@
                     location.reload();
                 }
             } else {
-                alert("Le client Supabase n'est pas prêt. Vérifie ta clé API.");
+                alert("Le client Supabase n'est pas prêt.");
             }
         };
     </script>
