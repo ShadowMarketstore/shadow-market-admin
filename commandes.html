@@ -1,35 +1,204 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mes Commandes</title>
+    <title>Shadow Market - Commande & Statistiques</title>
     <style>
-        body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 0; margin: 0; }
-        h1 { color: #00ffff; padding: 20px; margin: 0; font-size: 20px; border-bottom: 2px solid #00ffff; }
+        body { 
+            background: #050505; 
+            color: #00ffff; 
+            font-family: 'Courier New', Courier, monospace; 
+            padding: 10px; 
+            margin: 0; 
+        }
+        .nav-bar { 
+            background: #111; 
+            padding: 15px; 
+            border-bottom: 2px solid #00ffff; 
+            display: flex; 
+            gap: 15px; 
+            margin-bottom: 20px; 
+        }
+        .nav-bar a { 
+            color: white; 
+            text-decoration: none; 
+            font-size: 14px; 
+        }
+        .nav-bar a.active {
+            color: #00ffff;
+            font-weight: bold;
+        }
         
-        .container { padding: 20px; }
-        .order-card { 
-            background: #1a1a1a; padding: 15px; margin-bottom: 10px; 
-            border-left: 4px solid #00ffff; border-radius: 5px;
+        h1 { 
+            color: #00ffff; 
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            font-size: 1.8em;
+        }
+
+        /* Style du Tableau Cyberpunk */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 15px;
+            border-bottom: 1px solid #222;
+            white-space: nowrap;
+        }
+
+        th {
+            background: #151515;
+            color: #00ffff;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #00ffff;
+        }
+
+        tr:hover {
+            background: #1a1a1a;
+        }
+
+        /* Style des images miniatures */
+        .product-mini-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+            background-size: cover;
+            background-position: center;
+            background-color: #000;
+            display: inline-block;
+        }
+
+        .no-img {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        /* Stats et Badges */
+        .stat-badge {
+            background: #00ffff;
+            color: #000;
+            padding: 4px 10px;
+            font-weight: bold;
+            border-radius: 3px;
+            box-shadow: 0 0 5px #00ffff;
+        }
+        
+        .stock-badge {
+            color: #fff;
+        }
+        
+        .out-of-stock {
+            color: #ff3333;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
-    <nav style="background: #111; padding: 15px; border-bottom: 2px solid #00ffff; display: flex; gap: 15px;">
-        <a href="index.html" style="color: white; text-decoration: none;">Accueil</a>
-        <a href="produits.html" style="color: white; text-decoration: none;">Stock</a>
-        <a href="formulaire.html" style="color: white; text-decoration: none;">Ajouter</a>
-        <a href="commande.html" style="color: #00ffff; text-decoration: none; font-weight: bold;">Commandes</a>
+    <nav class="nav-bar">
+        <a href="index.html">Boutique</a>
+        <a href="formulaire.html">Ajouter un Article</a>
+        <a href="commande.html" class="active">Mes Produits</a>
     </nav>
 
-    <h1>Commandes récentes</h1>
+    <h1>Mes Produits</h1>
 
-    <div class="container" id="orders-list">
-        <div class="order-card">Aucune commande pour le moment.</div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Nom PRODUCT</th>
+                    <th>Stock Actuel</th>
+                    <th>Ventes</th>
+                </tr>
+            </thead>
+            <tbody id="products-table-body">
+                <tr>
+                    <td colspan="4" style="text-align: center; color: #00ffff;">Chargement des statistiques...</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const supabaseUrl = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
+        const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZimxjbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4'.trim();
+        
+        const supabaseClient = supabase.createClient(supabaseUrl, apiKey);
+
+        async function loadAdminProducts() {
+            const tbody = document.getElementById('products-table-body');
+            
+            try {
+                // Récupération des colonnes de ta table products
+                const { data: products, error } = await supabaseClient
+                    .from('products')
+                    .select('name, stock_quantity, image_url, sales_count'); 
+
+                if (error) throw error;
+
+                if (!products || products.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ff3333;">Aucun produit trouvé dans la base de données.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = '';
+
+                products.forEach(product => {
+                    // Image miniature
+                    let imageHTML = `<div class="product-mini-img no-img">📦</div>`;
+                    if (product.image_url) {
+                        imageHTML = `<div class="product-mini-img" style="background-image: url('${product.image_url}');"></div>`;
+                    }
+
+                    // Stock
+                    const stock = parseInt(product.stock_quantity) || 0;
+                    let stockHTML = `<span class="stock-badge">${stock}</span>`;
+                    if (stock <= 0) {
+                        stockHTML = `<span class="out-of-stock">ÉPUISÉ</span>`;
+                    }
+
+                    // Ventes (sécurité : affiche 0 si la colonne n'est pas encore incrémentée)
+                    const ventes = product.sales_count !== undefined && product.sales_count !== null ? product.sales_count : 0;
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${imageHTML}</td>
+                        <td style="font-weight: bold; color: #fff;">${product.name}</td>
+                        <td>${stockHTML}</td>
+                        <td><span class="stat-badge">${ventes}</span></td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+            } catch (err) {
+                console.error("Erreur d'affichage :", err);
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ff3333;">Erreur lors de la synchronisation avec Supabase.</td></tr>`;
+            }
+        }
+
+        window.onload = loadAdminProducts;
+    </script>
 </body>
 </html>
