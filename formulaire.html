@@ -1,4 +1,4 @@
-6<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -81,17 +81,18 @@
         let uploadedImageUrl = "";
 
         const supabaseUrl = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
-        const apiKey = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWnbhdntbmdidSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzgyNDY5NDU4LCJleHAiOjIwOTgwNDU0NTh9.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4'.trim();
+        
+        // METS TA CLE NEUVE ET PROPRE ICI SANS ESPACES
+        const apiKey = 'COLLE_LA_LONGUE_CLE_ANON_ICI'.trim();
 
         try {
-            if (typeof supabase !== 'undefined') {
+            if (typeof supabase !== 'undefined' && apiKey !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4') {
                 supabaseClient = supabase.createClient(supabaseUrl, apiKey);
             }
         } catch (e) {
-            console.error("Erreur initialisation : ", e);
+            console.error("Erreur d'initialisation : ", e);
         }
         
-        // Upload via requêtes HTTP directes pour contourner le bug "JWS Protected Header"
         async function processFile(file) {
             if (!file) return;
 
@@ -113,17 +114,15 @@
                 });
 
                 if (response.ok) {
-                    // L'upload a réussi, on construit l'URL publique directement
                     uploadedImageUrl = `${supabaseUrl}/storage/v1/object/public/products/${filePath}`;
                     document.getElementById('uploadStatus').innerText = "✅ En ligne : " + file.name;
                 } else {
                     const errData = await response.json();
-                    alert("Erreur Stockage Direct : " + (errData.message || response.statusText));
+                    alert("Erreur Supabase : " + (errData.message || response.statusText));
                     document.getElementById('uploadStatus').innerText = "❌ Échec de l'envoi.";
                 }
             } catch (err) {
                 console.error(err);
-                alert("Erreur réseau lors du transfert.");
                 document.getElementById('uploadStatus').innerText = "❌ Erreur réseau.";
             }
         }
@@ -155,8 +154,11 @@
                     alert("Produit enregistré avec succès sur le Shadow Market !");
                     location.reload();
                 }
+            } else {
+                alert("Le client Supabase n'est pas prêt. Vérifie ta clé API.");
             }
         };
     </script>
 </body>
 </html>
+
