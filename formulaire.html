@@ -1,9 +1,73 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="UTF-8"><style>body{background:#0a0a0a; color:white; padding:20px;}</style></head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter un Produit</title>
+    <style>
+        body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 20px; margin: 0; }
+        h1 { color: #00ffff; font-size: 20px; }
+        a { color: #00ffff; text-decoration: none; display: block; margin-bottom: 20px; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #aaa; }
+        input { 
+            width: 100%; padding: 12px; box-sizing: border-box;
+            background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 5px; 
+        }
+        button { 
+            background: #00ffff; color: #0a0a0a; border: none; padding: 15px; 
+            width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer; margin-top: 10px;
+        }
+    </style>
+</head>
 <body>
-    <h1>Ajouter un produit</h1>
-    <a href="index.html" style="color:#00ffff;">Retour au tableau de bord</a>
-    </body>
-</html>
 
+    <a href="produits.html">← Retour au tableau de bord</a>
+    <h1>Ajouter un produit</h1>
+
+    <div class="form-group">
+        <label>Nom du produit</label>
+        <input type="text" id="name" placeholder="Ex: Item VIP">
+    </div>
+    <div class="form-group">
+        <label>Lien de l'image (URL)</label>
+        <input type="text" id="image_url" placeholder="https://...">
+    </div>
+    <div class="form-group">
+        <label>Nombre de ventes</label>
+        <input type="number" id="sales_count" value="0">
+    </div>
+    
+    <button id="add-btn">Valider et Ajouter</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Initialisation Supabase
+        const supabase = supabase.createClient(
+            'https://jsuvimxjmjiljntmgbzu.supabase.co', 
+            'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
+        );
+
+        document.getElementById('add-btn').addEventListener('click', async () => {
+            const name = document.getElementById('name').value;
+            const image_url = document.getElementById('image_url').value;
+            const sales_count = parseInt(document.getElementById('sales_count').value);
+
+            if (!name) { alert("Le nom est obligatoire !"); return; }
+
+            const { error } = await supabase
+                .from('products')
+                .insert([{ name, image_url, sales_count }]);
+
+            if (error) {
+                alert("Erreur Supabase : " + error.message);
+            } else {
+                alert("Produit ajouté avec succès !");
+                document.getElementById('name').value = '';
+                document.getElementById('image_url').value = '';
+            }
+        });
+    </script>
+</body>
+</html>
