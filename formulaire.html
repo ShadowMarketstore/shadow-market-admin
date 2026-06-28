@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter un Produit</title>
     <style>
-        body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 20px; margin: 0; }
-        h1 { color: #00ffff; font-size: 20px; }
-        a { color: #00ffff; text-decoration: none; display: block; margin-bottom: 20px; }
+        /* Ici, uniquement le CSS */
+        body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 0; margin: 0; }
+        h1 { color: #00ffff; font-size: 20px; padding: 20px; }
         
+        .form-container { padding: 20px; }
         .form-group { margin-bottom: 15px; }
         label { display: block; margin-bottom: 5px; color: #aaa; }
         input { 
@@ -23,27 +24,33 @@
 </head>
 <body>
 
-    <a href="produits.html">← Retour au tableau de bord</a>
+    <nav style="background: #111; padding: 15px; border-bottom: 2px solid #00ffff; display: flex; gap: 15px;">
+        <a href="index.html" style="color: white; text-decoration: none;">Accueil</a>
+        <a href="produits.html" style="color: white; text-decoration: none;">Stock</a>
+        <a href="formulaire.html" style="color: white; text-decoration: none;">Ajouter</a>
+    </nav>
+
     <h1>Ajouter un produit</h1>
 
-    <div class="form-group">
-        <label>Nom du produit</label>
-        <input type="text" id="name" placeholder="Ex: Item VIP">
+    <div class="form-container">
+        <div class="form-group">
+            <label>Nom du produit</label>
+            <input type="text" id="name" placeholder="Ex: Item VIP">
+        </div>
+        <div class="form-group">
+            <label>Lien de l'image (URL)</label>
+            <input type="text" id="image_url" placeholder="https://...">
+        </div>
+        <div class="form-group">
+            <label>Nombre de ventes</label>
+            <input type="number" id="sales_count" value="0">
+        </div>
+        
+        <button id="add-btn">Valider et Ajouter</button>
     </div>
-    <div class="form-group">
-        <label>Lien de l'image (URL)</label>
-        <input type="text" id="image_url" placeholder="https://...">
-    </div>
-    <div class="form-group">
-        <label>Nombre de ventes</label>
-        <input type="number" id="sales_count" value="0">
-    </div>
-    
-    <button id="add-btn">Valider et Ajouter</button>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Initialisation Supabase
         const supabase = supabase.createClient(
             'https://jsuvimxjmjiljntmgbzu.supabase.co', 
             'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
@@ -64,6 +71,7 @@
                 alert("Erreur Supabase : " + error.message);
             } else {
                 alert("Produit ajouté avec succès !");
+                // Nettoyage après succès
                 document.getElementById('name').value = '';
                 document.getElementById('image_url').value = '';
             }
