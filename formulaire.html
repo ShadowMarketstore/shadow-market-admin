@@ -1,107 +1,202 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Administration - Shadow Market</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body style="background-color: #121212; color: #ffffff; font-family: Arial, sans-serif; padding: 20px;">
-
-  <h1 style="text-align: center; color: #00bfa5;">Ajouter un Article</h1>
-
-  <form id="add-product-form" style="max-width: 500px; margin: 0 auto; background: #1e1e1e; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-    
-    <div class="form-group" style="margin-bottom: 15px;">
-      <label for="product-title" style="display: block; font-weight: bold; margin-bottom: 5px;">Nom de l'article :</label>
-      <input type="text" id="product-title" name="title" required style="width: 100%; padding: 8px; box-sizing: border-box; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 4px;">
-    </div>
-
-    <div class="form-group" style="margin-bottom: 15px;">
-      <label for="product-description" style="display: block; font-weight: bold; margin-bottom: 5px;">Description :</label>
-      <textarea id="product-description" name="description" rows="3" style="width: 100%; padding: 8px; box-sizing: border-box; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 4px;"></textarea>
-    </div>
-
-    <div class="form-group" style="margin-bottom: 15px;">
-      <label for="product-price" style="display: block; font-weight: bold; margin-bottom: 5px;">Prix de base (CFA) :</label>
-      <input type="number" id="product-price" name="price" step="0.01" required style="width: 100%; padding: 8px; box-sizing: border-box; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 4px;">
-    </div>
-
-    <div class="form-group" style="margin-bottom: 15px;">
-      <label for="product-stock" style="display: block; font-weight: bold; margin-bottom: 5px;">Quantité en stock :</label>
-      <input type="number" id="product-stock" name="stock" min="0" value="1" required style="width: 100%; padding: 8px; box-sizing: border-box; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 4px;">
-    </div>
-
-    <div class="form-group" style="margin-bottom: 20px;">
-      <label for="product-discount" style="display: block; font-weight: bold; margin-bottom: 5px;">Appliquer une réduction :</label>
-      <select id="product-discount" name="discount" style="width: 100%; padding: 8px; box-sizing: border-box; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 4px;">
-        <option value="0">Aucune réduction (0%)</option>
-        <option value="5">-5%</option>
-        <option value="10">-10%</option>
-        <option value="15">-15%</option>
-        <option value="20">-20%</option>
-        <option value="30">-30%</option>
-        <option value="50">-50%</option>
-      </select>
-    </div>
-
-    <button type="submit" style="background-color: #00bfa5; color: white; border: none; padding: 10px 20px; font-size: 16px; cursor: pointer; width: 100%; border-radius: 4px; font-weight: bold;">
-      Enregistrer le produit
-    </button>
-  </form>
-
-  <script>
-    // Initialisation avec tes accès de projet valides
-    const SUPABASE_URL = "https://jsuvimxjmjiljntmgbzu.supabase.co";
-    const SUPABASE_ANON_KEY = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4";
-    
-    const { createClient } = window['@supabase/supabase-js'];
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Gestion de l'envoi du formulaire
-    document.getElementById('add-product-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const title = document.getElementById('product-title').value;
-      const description = document.getElementById('product-description').value;
-      const priceBase = parseFloat(document.getElementById('product-price').value);
-      
-      // Récupération dynamique des deux nouvelles valeurs
-      const discountPercent = parseInt(document.getElementById('product-discount').value);
-      const stockValue = parseInt(document.getElementById('product-stock').value);
-
-      // Algorithme : Calcul automatique du prix final remisé à afficher en boutique
-      const priceFinal = priceBase * (1 - discountPercent / 100);
-
-      // Nom de l'image de ton produit
-      const urlDeLimage = "1000306986.jpg"; 
-
-      // Préparation de l'objet produit mis à jour avec toutes les spécifications
-      const newProduct = {
-        title: title,
-        description: description,
-        price_base: priceBase,     // Stocke le prix initial
-        discount: discountPercent, // Stocke le pourcentage choisi (ex: 30)
-        price: priceFinal,         // Stocke le prix calculé après remise (-30%)
-        stock: stockValue,         // Stocke le nombre d'articles dispo
-        image_url: urlDeLimage
-      };
-
-      try {
-        const { data, error } = await supabase
-          .from('products')
-          .insert([newProduct]);
-
-        if (error) throw error;
-
-        alert("Produit enregistré avec succès sur le Shadow Market !");
-        document.getElementById('add-product-form').reset(); 
+    <meta charset="UTF-8">
+    <title>Shadow Market - Ajout Pro</title>
+    <style>
+        body { background: #050505; color: #00ffff; font-family: 'Courier New', Courier, monospace; padding: 10px; margin: 0; }
+        .nav-bar { background: #111; padding: 15px; border-bottom: 2px solid #00ffff; display: flex; gap: 15px; margin-bottom: 20px; }
+        .nav-bar a { color: white; text-decoration: none; font-size: 14px; }
+        .form-card { background: #111; padding: 20px; border: 1px solid #333; border-radius: 10px; }
         
-      } catch (error) {
-        console.error("Erreur d'insertion Supabase :", error.message);
-        alert("Une erreur est survenue lors de l'enregistrement : " + error.message);
-      }
-    });
-  </script>
+        /* Zone Média */
+        .upload-zone { border: 2px dashed #00ffff; padding: 30px; text-align: center; color: #00ffff; cursor: pointer; margin-bottom: 20px; border-radius: 5px; }
+
+        /* Menu Options */
+        #uploadMenu { display: none; margin-bottom: 20px; border: 1px solid #00ffff; padding: 5px; border-radius: 5px; }
+        .menu-option {
+            width: 100%; background: #000; border: 1px solid #00ffff; color: #00ffff;
+            padding: 12px; margin-bottom: 5px; cursor: pointer; text-align: center; display: block;
+            font-family: 'Courier New', Courier, monospace; font-weight: bold;
+        }
+        .menu-option:hover { background: #00ffff; color: #000; }
+
+        /* Inputs invisibles mais actifs */
+        .hidden-input {
+            position: absolute;
+            top: 0; left: 0;
+            width: 1px; height: 1px;
+            opacity: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        input, textarea, select { width: 100%; background: #000; border: 1px solid #444; color: white; padding: 12px; margin-bottom: 10px; border-radius: 5px; box-sizing: border-box; }
+        .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button#add-btn { background: #00ffff; color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 0 10px #00ffff; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <nav class="nav-bar">
+        <a href="index.html">Accueil</a>
+        <a href="produits.html">Stock</a>
+        <a href="formulaire.html" style="color: #00ffff;">Ajouter</a>
+    </nav>
+
+    <h1>Article</h1>
+
+    <div class="form-card">
+        <div class="upload-zone" onclick="document.getElementById('uploadMenu').style.display = 'block'" id="uploadZone">
+            <p id="uploadStatus">📷 Ajouter un média</p>
+        </div>
+
+        <div id="uploadMenu">
+            <button type="button" class="menu-option" onclick="document.getElementById('cameraInput').click()">Prendre une photo</button>
+            <button type="button" class="menu-option" onclick="document.getElementById('galleryInput').click()">Prendre dans la galerie</button>
+            <button type="button" class="menu-option" onclick="document.getElementById('fileInput').click()">Sélectionner un fichier</button>
+        </div>
+
+        <input type="file" id="cameraInput" class="hidden-input" capture="environment" accept="image/*">
+        <input type="file" id="galleryInput" class="hidden-input" accept="image/*">
+        <input type="file" id="fileInput" class="hidden-input" accept="image/*,application/*">
+
+        <input type="text" id="name" placeholder="Nom de l'article">
+        
+        <div class="price-grid">
+            <input type="number" id="price" placeholder="Prix final (€ ou CFA)" readonly style="background: #111; border-color: #222; color: #00ffff;">
+            <input type="number" id="old_price" placeholder="Prix d'origine (€ ou CFA)">
+        </div>
+
+        <input type="number" id="stock" placeholder="Quantité en stock" min="0" value="1">
+
+        <select id="discount">
+            <option value="0">Sélectionner une réduction (Aucune : 0%)</option>
+            <option value="5">-5%</option>
+            <option value="10">-10%</option>
+            <option value="15">-15%</option>
+            <option value="20">-20%</option>
+            <option value="30">-30%</option>
+            <option value="50">-50%</option>
+        </select>
+
+        <textarea id="desc" rows="4" placeholder="Ajoutez une description"></textarea>
+        
+        <select id="ribbon">
+            <option value="">Ruban (ex: Promo, Nouveauté)</option>
+            <option value="promo">Promo</option>
+            <option value="nouveau">Nouveauté</option>
+            <option value="edition_limitee">Édition Limitée</option>
+        </select>
+        
+        <button id="add-btn">Enregistrer</button>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        let supabaseClient = null;
+        let uploadedImageUrl = "";
+
+        const supabaseUrl = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
+        const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4'.trim();
+
+        // Initialisation du client Supabase
+        try {
+            if (typeof supabase !== 'undefined') {
+                supabaseClient = supabase.createClient(supabaseUrl, apiKey);
+            }
+        } catch (e) {
+            console.error("Erreur d'initialisation : ", e);
+        }
+        
+        async function processFile(file) {
+            if (!file) return;
+
+            document.getElementById('uploadMenu').style.display = 'none';
+            document.getElementById('uploadStatus').innerText = "⏳ Synchronisation de : " + file.name;
+
+            const filePath = `public/${Date.now()}_${file.name}`;
+            const uploadUrl = `${supabaseUrl}/storage/v1/object/products/${filePath}`;
+
+            try {
+                const response = await fetch(uploadUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'apikey': apiKey,
+                        'Content-Type': file.type
+                    },
+                    body: file
+                });
+
+                if (response.ok) {
+                    uploadedImageUrl = `${supabaseUrl}/storage/v1/object/public/products/${filePath}`;
+                    document.getElementById('uploadStatus').innerText = "✅ En ligne : " + file.name;
+                } else {
+                    const errData = await response.json();
+                    alert("Erreur Supabase : " + (errData.message || response.statusText));
+                    document.getElementById('uploadStatus').innerText = "❌ Échec de l'envoi.";
+                }
+            } catch (err) {
+                console.error(err);
+                document.getElementById('uploadStatus').innerText = "❌ Erreur réseau.";
+            }
+        }
+
+        document.getElementById('cameraInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
+        document.getElementById('galleryInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
+        document.getElementById('fileInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
+
+        // ALGORITHME : Calcul automatique en direct du prix final selon la réduction choisie
+        function recalculerPrixFinal() {
+            const prixOrigine = parseFloat(document.getElementById('old_price').value) || 0;
+            const reduction = parseInt(document.getElementById('discount').value) || 0;
+            
+            const prixCalcule = prixOrigine * (1 - reduction / 100);
+            
+            // On affiche le résultat arrondi dans le champ de gauche
+            document.getElementById('price').value = prixCalcule.toFixed(2);
+        }
+
+        // Écouteurs pour mettre à jour le prix dès qu'on tape un prix ou qu'on change la promo
+        document.getElementById('old_price').addEventListener('input', recalculerPrixFinal);
+        document.getElementById('discount').addEventListener('change', recalculerPrixFinal);
+
+        document.getElementById('add-btn').onclick = async () => {
+            if (!uploadedImageUrl) {
+                alert("Veuillez d'abord ajouter une image.");
+                return;
+            }
+
+            const prixOrigine = parseFloat(document.getElementById('old_price').value) || 0;
+            const reduction = parseInt(document.getElementById('discount').value) || 0;
+            const prixFinal = parseFloat(document.getElementById('price').value) || prixOrigine;
+            const quantiteStock = parseInt(document.getElementById('stock').value) || 0;
+
+            const dataToSave = {
+                name: document.getElementById('name').value,
+                price: prixFinal,                 // Prix final calculé avec réduction
+                old_price: prixOrigine,           // Prix d'origine enregistré
+                discount: reduction,              // Le pourcentage de réduction stocké
+                stock: quantiteStock,             // Le nombre d'articles en stock
+                description: document.getElementById('desc').value,
+                ribbon: document.getElementById('ribbon').value,
+                image_url: uploadedImageUrl
+            };
+
+            if (supabaseClient) {
+                const { error } = await supabaseClient.from('products').insert([dataToSave]);
+                if (error) {
+                    alert("Erreur Base de données : " + error.message);
+                } else {
+                    alert("Produit enregistré avec succès sur le Shadow Market !");
+                    location.reload();
+                }
+            } else {
+                alert("Le client Supabase n'est pas prêt.");
+            }
+        };
+    </script>
 </body>
 </html>
+
