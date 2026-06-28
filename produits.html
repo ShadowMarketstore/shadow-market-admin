@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shadow Market - Stock</title>
     <style>
-        /* Ici, uniquement le CSS */
         body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 0; margin: 0; }
         h1 { color: #00ffff; padding: 20px; margin: 0; font-size: 20px; border-bottom: 2px solid #00ffff; }
         
@@ -30,7 +29,7 @@
         }
         
         .header { background-color: #1a1a1a; font-weight: bold; color: #00ffff; }
-        .product-img { width: 50px; height: 30px; background: #333; border-radius: 2px; }
+        .product-img { width: 50px; height: 30px; background: #333; border-radius: 2px; object-fit: cover; }
     </style>
 </head>
 <body>
@@ -47,39 +46,47 @@
         <div class="my-table">
             <div class="cell header">Image</div>
             <div class="cell header">NOM PRODUCT</div>
-            <div class="cell header">Ventes</div>
-
-            <div id="product-container" style="display: contents;">
-                </div>
+            <div class="cell header">Stock</div> <div id="product-container" style="display: contents;">
+                <div class="cell" style="grid-column: span 3; justify-content: center;">Chargement...</div>
+            </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // Initialisation avec ta clé publique
         const supabase = supabase.createClient(
             'https://jsuvimxjmjiljntmgbzu.supabase.co', 
-            'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZimxjbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4'
         );
 
         async function loadData() {
             const container = document.getElementById('product-container');
-            const { data, error } = await supabase.from('products').select('*');
             
-            if (error) {
-                container.innerHTML = `<div class="cell" style="grid-column: span 3; color: red;">Erreur: ${error.message}</div>`;
-                return;
-            }
+            try {
+                // On récupère les colonnes existantes dans ta table 'products'
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('name, image_url, stock_quantity');
+                
+                if (error) throw error;
 
-            if (data && data.length > 0) {
-                container.innerHTML = data.map(p => `
-                    <div class="cell"><img src="${p.image_url || ''}" class="product-img"></div>
-                    <div class="cell" style="justify-content: flex-start;">${p.name || 'Produit'}</div>
-                    <div class="cell">${p.sales_count || 0}</div>
-                `).join('');
-            } else {
-                container.innerHTML = `<div class="cell" style="grid-column: span 3;">Aucun produit trouvé.</div>`;
+                if (data && data.length > 0) {
+                    container.innerHTML = data.map(p => `
+                        <div class="cell"><img src="${p.image_url || ''}" class="product-img" onerror="this.style.display='none'"></div>
+                        <div class="cell" style="justify-content: flex-start;">${p.name || 'Produit'}</div>
+                        <div class="cell">${p.stock_quantity || 0}</div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `<div class="cell" style="grid-column: span 3;">Aucun produit trouvé.</div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="cell" style="grid-column: span 3; color: red;">Erreur de connexion.</div>`;
             }
         }
+
+        // Lancement de la récupération des données
         loadData();
     </script>
 </body>
