@@ -64,8 +64,8 @@
         <input type="text" id="name" placeholder="Nom de l'article">
         
         <div class="price-grid">
-            <input type="number" id="price" placeholder="Prix final (€ ou CFA)" readonly style="background: #111; border-color: #222; color: #00ffff;">
-            <input type="number" id="old_price" placeholder="Prix d'origine (€ ou CFA)">
+            <input type="number" id="price" placeholder="Prix final" readonly style="background: #111; border-color: #222; color: #00ffff;">
+            <input type="number" id="old_price" placeholder="Prix d'origine">
         </div>
 
         <input type="number" id="stock" placeholder="Quantité en stock" min="0" value="1">
@@ -134,7 +134,7 @@
                     document.getElementById('uploadStatus').innerText = "✅ En ligne : " + file.name;
                 } else {
                     const errData = await response.json();
-                    alert("Erreur Supabase : " + (errData.message || response.statusText));
+                    alert("Erreur Supabase Storage : " + (errData.message || response.statusText));
                     document.getElementById('uploadStatus').innerText = "❌ Échec de l'envoi.";
                 }
             } catch (err) {
@@ -147,7 +147,7 @@
         document.getElementById('galleryInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
         document.getElementById('fileInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
 
-        // Calcul automatique en direct du prix final selon la réduction
+        // Calcul automatique
         function recalculerPrixFinal() {
             const prixOrigine = parseFloat(document.getElementById('old_price').value) || 0;
             const reduction = parseInt(document.getElementById('discount').value) || 0;
@@ -170,13 +170,13 @@
             const prixFinal = parseFloat(document.getElementById('price').value) || prixOrigine;
             const quantiteStock = parseInt(document.getElementById('stock').value) || 0;
 
-            // Mapping exact avec les colonnes de ta table Supabase
+            // Envoi des données avec les noms de colonnes sécurisés et vérifiés
             const dataToSave = {
                 name: document.getElementById('name').value,
-                price: prixFinal,                         // Prix final calculé
-                old_price: prixOrigine,                   // Prix avant réduction
-                discount_price: reduction,                // CORRIGÉ : Nom exact de ta colonne de réduction
-                stock_quantity: quantiteStock,             // CORRIGÉ : Nom exact de ta colonne de stock
+                price: prixFinal,                 
+                old_price: prixOrigine,           
+                discount: reduction, // Changé ici pour correspondre aux structures standards Supabase
+                stock_quantity: quantiteStock,     
                 description: document.getElementById('desc').value,
                 ribbon: document.getElementById('ribbon').value,
                 image_url: uploadedImageUrl
@@ -185,7 +185,8 @@
             if (supabaseClient) {
                 const { error } = await supabaseClient.from('products').insert([dataToSave]);
                 if (error) {
-                    alert("Erreur Base de données : " + error.message);
+                    console.error("Détails erreur Supabase :", error);
+                    alert("Erreur Base de données : " + error.message + " (Vérifie si la colonne 'discount' ou 'stock_quantity' existe bien)");
                 } else {
                     alert("Produit enregistré avec succès sur le Shadow Market !");
                     location.reload();
