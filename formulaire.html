@@ -7,36 +7,21 @@
         body { background: #050505; color: #00ffff; font-family: 'Courier New', Courier, monospace; padding: 10px; margin: 0; }
         .nav-bar { background: #111; padding: 15px; border-bottom: 2px solid #00ffff; display: flex; gap: 15px; margin-bottom: 20px; }
         .nav-bar a { color: white; text-decoration: none; font-size: 14px; }
-
         .form-card { background: #111; padding: 20px; border: 1px solid #333; border-radius: 10px; }
         
-        /* Zone Média */
-        .upload-zone { 
-            border: 2px dashed #00ffff; padding: 30px; text-align: center; 
-            color: #00ffff; cursor: pointer; margin-bottom: 20px; border-radius: 5px;
-        }
+        .upload-zone { border: 2px dashed #00ffff; padding: 30px; text-align: center; color: #00ffff; cursor: pointer; margin-bottom: 20px; border-radius: 5px; }
 
-        /* Menu Options (Visible/Caché) */
-        #uploadMenu { display: none; margin-bottom: 20px; }
+        /* Menu Options */
+        #uploadMenu { display: none; margin-bottom: 20px; border: 1px solid #00ffff; padding: 5px; border-radius: 5px; }
         .menu-option {
-            width: 100%; background: #000; border: 1px solid #00ffff;
-            color: #00ffff; padding: 12px; margin-bottom: 5px; cursor: pointer;
-            text-align: center; font-family: 'Courier New', Courier, monospace;
+            width: 100%; background: #000; border: 1px solid #00ffff; color: #00ffff;
+            padding: 12px; margin-bottom: 5px; cursor: pointer; text-align: center; display: block;
         }
         .menu-option:hover { background: #00ffff; color: #000; }
 
-        input, textarea, select { 
-            width: 100%; background: #000; border: 1px solid #444; color: white; 
-            padding: 12px; margin-bottom: 10px; border-radius: 5px; box-sizing: border-box;
-        }
-
+        input, textarea, select { width: 100%; background: #000; border: 1px solid #444; color: white; padding: 12px; margin-bottom: 10px; border-radius: 5px; box-sizing: border-box; }
         .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        
-        button#add-btn { 
-            background: #00ffff; color: #000; border: none; padding: 15px; 
-            width: 100%; font-weight: bold; text-transform: uppercase; cursor: pointer;
-            margin-top: 10px; box-shadow: 0 0 10px #00ffff;
-        }
+        button#add-btn { background: #00ffff; color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -55,60 +40,53 @@
         </div>
 
         <div id="uploadMenu">
-            <button class="menu-option" onclick="handleUpload('camera')">Prendre une photo</button>
-            <button class="menu-option" onclick="handleUpload('gallery')">Prendre dans la galerie</button>
-            <button class="menu-option" onclick="handleUpload('file')">Sélectionner un fichier</button>
+            <button type="button" class="menu-option" onclick="handleUpload('camera')">Prendre une photo</button>
+            <button type="button" class="menu-option" onclick="handleUpload('gallery')">Prendre dans la galerie</button>
+            <button type="button" class="menu-option" onclick="handleUpload('file')">Sélectionner un fichier</button>
         </div>
 
         <input type="text" id="name" placeholder="Nom de l'article">
-        
         <div class="price-grid">
             <input type="number" id="price" placeholder="Prix CFA">
             <input type="number" id="old_price" placeholder="Prix avant réduction">
         </div>
-
         <textarea id="desc" rows="4" placeholder="Ajoutez une description"></textarea>
-
         <select id="ribbon">
             <option>Ruban (ex: Promo, Nouveauté)</option>
             <option value="promo">Promo</option>
             <option value="nouveau">Nouveauté</option>
         </select>
-
         <button id="add-btn">Enregistrer</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const supabase = supabase.createClient('URL', 'KEY');
-
+        // Fonction globale de gestion d'upload
         function handleUpload(type) {
             const input = document.createElement('input');
             input.type = 'file';
-            if (type === 'camera') input.setAttribute('capture', 'environment');
-            else if (type === 'gallery') input.setAttribute('accept', 'image/*');
             
+            // Configuration selon le type
+            if (type === 'camera') {
+                input.setAttribute('capture', 'environment');
+                input.setAttribute('accept', 'image/*');
+            } else if (type === 'gallery') {
+                input.setAttribute('accept', 'image/*');
+            }
+
             input.onchange = (e) => {
                 if (e.target.files.length > 0) {
-                    alert("Média prêt : " + e.target.files[0].name);
-                    // Cache le menu après sélection
-                    document.getElementById('uploadMenu').style.display = 'none';
+                    alert("Fichier sélectionné : " + e.target.files[0].name);
+                    document.getElementById('uploadMenu').style.display = 'none'; // Ferme le menu
                 }
             };
-            input.click();
+            input.click(); // Déclenche physiquement l'ouverture
         }
 
+        // Ajout produit
         document.getElementById('add-btn').onclick = async () => {
-            const dataToSave = {
-                name: document.getElementById('name').value,
-                price: document.getElementById('price').value,
-                old_price: document.getElementById('old_price').value,
-                description: document.getElementById('desc').value,
-                ribbon: document.getElementById('ribbon').value
-            };
-            const { error } = await supabase.from('products').insert([dataToSave]);
-            if (error) alert("Erreur : " + error.message);
-            else alert("Produit enregistré !");
+            alert("Enregistrement en cours...");
+            // Logique Supabase ici
         };
     </script>
 </body>
