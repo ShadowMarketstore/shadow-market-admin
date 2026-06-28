@@ -48,10 +48,12 @@
                 container.innerHTML = data.map(p => `
                     <div class="product-grid product-item">
                         <img src="${p.image_url || ''}" class="product-img" onerror="this.style.display='none'">
-                        <div>${p.name || 'Produit'}</div>
-                        <div class="sales-val">${p.sales_count || 0}</div>
+                        <div>${p.name || p.nom || 'Produit sans nom'}</div>
+                        <div class="sales-val">${p.sales_count || p.ventes || 0}</div>
                     </div>
                 `).join('');
+            } else if (error) {
+                console.error("Erreur chargement:", error);
             }
         }
         fetchProducts();
