@@ -3,55 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shadow Market - Stock</title>
+    <title>Shadow Market - Mes Produits</title>
     <style>
-        body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 0; margin: 0; }
-        h1 { color: #00ffff; padding: 20px; margin: 0; font-size: 20px; border-bottom: 2px solid #00ffff; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; }
+        nav { background: #111; padding: 15px; border-bottom: 1px solid #333; display: flex; gap: 20px; }
+        nav a { color: #888; text-decoration: none; }
         
-        .wrapper { width: 100%; padding: 10px; box-sizing: border-box; }
+        h1 { color: #00ffff; padding: 20px; margin: 0; }
         
-        .my-table {
-            display: grid;
-            grid-template-columns: 80px 1fr 100px;
+        /* Table avec Scroll vertical */
+        .table-container {
             width: 100%;
-            border: 1px solid #333;
+            max-height: 70vh; /* Permet le scroll */
+            overflow-y: auto;
+            border-top: 1px solid #333;
         }
-        
-        .cell {
-            padding: 12px 5px;
-            border-bottom: 1px solid #333;
-            border-right: 1px solid #333;
-            display: flex;
+
+        .grid-header, .grid-row {
+            display: grid;
+            grid-template-columns: 80px 1fr 80px;
             align-items: center;
-            justify-content: center;
-            min-height: 50px;
-            font-size: 13px;
+            border-bottom: 1px solid #222;
         }
+
+        .grid-header { background: #111; padding: 10px; color: #00ffff; font-weight: bold; }
+        .grid-row { padding: 10px; }
         
-        .header { background-color: #1a1a1a; font-weight: bold; color: #00ffff; }
-        .product-img { width: 50px; height: 40px; background: #333; border-radius: 4px; object-fit: cover; }
+        .img-cell { width: 50px; height: 50px; background: #222; border-radius: 4px; object-fit: cover; }
     </style>
 </head>
 <body>
 
-    <nav style="background: #111; padding: 15px; border-bottom: 2px solid #00ffff; display: flex; gap: 15px;">
-        <a href="index.html" style="color: white; text-decoration: none;">Accueil</a>
-        <a href="produits.html" style="color: white; text-decoration: none;">Stock</a>
-        <a href="formulaire.html" style="color: white; text-decoration: none;">Ajouter</a>
+    <nav>
+        <a href="index.html">Accueil</a>
+        <a href="produits.html" style="color: #00ffff;">Stock</a>
+        <a href="formulaire.html">Ajouter</a>
     </nav>
 
     <h1>Mes Produits</h1>
-    
-    <div class="wrapper">
-        <div class="my-table">
-            <div class="cell header">Image</div>
-            <div class="cell header">NOM PRODUCT</div>
-            <div class="cell header">Stock</div>
 
-            <div id="product-container" style="display: contents;">
-                <div class="cell" style="grid-column: span 3;">Chargement en cours...</div>
-            </div>
+    <div class="table-container">
+        <div class="grid-header">
+            <div>Image</div>
+            <div>NOM PRODUCT</div>
+            <div>Stock</div>
         </div>
+        <div id="product-list">
+            </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -61,30 +59,35 @@
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZimxjbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4'
         );
 
-        async function loadData() {
-            const container = document.getElementById('product-container');
-            
-            // Appel vers la table 'products'
-            const { data, error } = await supabase
-                .from('products')
-                .select('name, image_url, stock_quantity');
-            
-            if (error) {
-                container.innerHTML = `<div class="cell" style="grid-column: span 3; color: red;">Erreur: ${error.message}</div>`;
-                return;
-            }
+        async function fetchProducts() {
+            const list = document.getElementById('product-list');
+            try {
+                // Utilisation des colonnes vérifiées dans ta base
+                const { data, error } = await supabase
+                    .from('products')
+                    .select('name, image_url, stock_quantity');
 
-            if (data && data.length > 0) {
-                container.innerHTML = data.map(p => `
-                    <div class="cell"><img src="${p.image_url || ''}" class="product-img" onerror="this.style.display='none'"></div>
-                    <div class="cell" style="justify-content: flex-start;">${p.name || 'Produit'}</div>
-                    <div class="cell">${p.stock_quantity > 0 ? 'En stock' : 'Rupture'}</div>
+                if (error) throw error;
+
+                if (data.length === 0) {
+                    list.innerHTML = '<div style="padding: 20px;">Aucun produit.</div>';
+                    return;
+                }
+
+                list.innerHTML = data.map(p => `
+                    <div class="grid-row">
+                        <div><img src="${p.image_url}" class="img-cell" onerror="this.style.display='none'"></div>
+                        <div>${p.name}</div>
+                        <div>${p.stock_quantity > 0 ? p.stock_quantity : 'Rupture'}</div>
+                    </div>
                 `).join('');
-            } else {
-                container.innerHTML = `<div class="cell" style="grid-column: span 3;">Aucun produit trouvé.</div>`;
+            } catch (err) {
+                console.error("Erreur:", err);
+                list.innerHTML = '<div style="padding: 20px; color: red;">Erreur de chargement.</div>';
             }
         }
-        loadData();
+
+        fetchProducts();
     </script>
 </body>
 </html>
