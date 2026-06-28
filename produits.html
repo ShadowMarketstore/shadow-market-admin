@@ -6,43 +6,58 @@
     <title>Shadow Market - Produits</title>
     <style>
         body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 10px; margin: 0; }
-        h1 { color: #00ffff; border-bottom: 2px solid #00ffff; padding-bottom: 10px; font-size: 22px; }
+        h1 { color: #00ffff; border-bottom: 2px solid #00ffff; padding-bottom: 10px; font-size: 20px; }
         
-        /* Conteneur avec scroll (pour tout voir) */
-        .scroll-container { width: 100%; overflow-y: auto; max-height: 70vh; border: 1px solid #333; }
-        
+        /* Conteneur principal avec scroll automatique */
+        .table-wrapper {
+            width: 100%;
+            max-height: 80vh; /* Limite la hauteur pour forcer le scroll */
+            overflow-y: auto; /* Active le défilement vertical */
+            border: 1px solid #333;
+        }
+
+        /* Tableau en grille */
         .product-table { 
             display: grid; 
-            grid-template-columns: 100px 1fr 70px; /* Plus large */
+            grid-template-columns: 80px 1fr 60px; /* colonnes fixes */
             width: 100%;
         }
+        
         .cell { 
-            padding: 15px 10px; /* Plus d'espace */
+            padding: 15px 5px; 
             border-bottom: 1px solid #333; 
-            border-right: 1px solid #333; 
+            border-right: 1px solid #333; /* Ajoute la séparation verticale */
             display: flex; 
             align-items: center; 
             justify-content: center;
-            min-height: 50px; /* Hauteur minimale pour bien voir */
+            min-height: 40px;
+            font-size: 14px;
         }
-        .header-cell { font-weight: bold; color: #b0b0b0; background: #111; position: sticky; top: 0; }
         
-        .product-img { width: 80px; height: 50px; background: #333; border-radius: 4px; object-fit: cover; }
-        .sales-val { color: #00ffff; font-weight: bold; font-size: 16px; }
+        .header-cell { 
+            font-weight: bold; 
+            color: #b0b0b0; 
+            background: #111; 
+            position: sticky; 
+            top: 0; 
+            z-index: 10;
+        }
+        
+        .product-img { width: 50px; height: 35px; background: #222; border-radius: 2px; object-fit: cover; }
+        .sales-val { color: #00ffff; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <h1>Mes Produits</h1>
     
-    <div class="scroll-container">
+    <div class="table-wrapper">
         <div class="product-table">
             <div class="cell header-cell">Image</div>
             <div class="cell header-cell">NOM PRODUCT</div>
             <div class="cell header-cell">Ventes</div>
 
-            <div id="product-container" style="display: contents;">
-                </div>
+            <div id="product-container" style="display: contents;"></div>
         </div>
     </div>
 
@@ -60,11 +75,9 @@
             if (data && data.length > 0) {
                 container.innerHTML = data.map(p => `
                     <div class="cell"><img src="${p.image_url || ''}" class="product-img"></div>
-                    <div class="cell" style="justify-content: flex-start; font-size: 16px;">${p.name || p.nom || 'Produit'}</div>
+                    <div class="cell" style="justify-content: flex-start;">${p.name || p.nom || 'Produit'}</div>
                     <div class="cell sales-val">${p.sales_count || p.ventes || 0}</div>
                 `).join('');
-            } else {
-                container.innerHTML = '<div class="cell" style="grid-column: span 3;">Aucun produit</div>';
             }
         }
         fetchProducts();
