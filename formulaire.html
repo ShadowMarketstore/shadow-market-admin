@@ -2,41 +2,99 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Shadow Market - Ajout</title>
+    <title>Shadow Market - Ajout Pro</title>
     <style>
-        body { background: #050505; color: #fff; font-family: 'Courier New', Courier, monospace; padding: 15px; margin: 0; }
+        body { 
+            background: #050505; 
+            color: #ffffff; /* Texte général en blanc pour le contraste */
+            font-family: 'Courier New', Courier, monospace; 
+            padding: 10px; 
+            margin: 0; 
+        }
         
-        /* Menu */
-        .nav-bar { display: flex; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .nav-bar a { color: #555; text-decoration: none; font-size: 14px; }
-        .nav-bar a.active { color: #ff0033; }
+        .nav-bar { 
+            background: #111; 
+            padding: 15px; 
+            border-bottom: 2px solid #00ffff; /* On garde le cyan pour la nav */
+            display: flex; 
+            gap: 15px; 
+            margin-bottom: 20px; 
+        }
+        .nav-bar a { color: white; text-decoration: none; font-size: 14px; }
+        .nav-bar a.active { color: #00ffff; }
 
-        h1 { color: #ff0033; font-size: 22px; margin-bottom: 20px; text-shadow: 0 0 5px #ff0033; }
-
-        .form-card { background: #0a0a0a; padding: 20px; border: 1px solid #ff0033; border-radius: 8px; }
-
-        /* Zone Image (plus fine) */
-        .upload-zone { 
-            border: 1px dashed #ff0033; padding: 20px; text-align: center; 
-            color: #ff0033; cursor: pointer; margin-bottom: 20px; font-size: 13px;
+        h1 {
+            color: #ff1a1a; /* Rouge cramoisi pour le titre */
+            text-shadow: 0 0 10px #ff1a1a; /* Effet néon */
+            text-transform: uppercase;
+            text-align: left;
+            margin-left: 10px;
         }
 
-        /* Inputs plus fins */
+        .form-card { 
+            background: #111; 
+            padding: 20px; 
+            border: 1px solid #333; 
+            border-radius: 10px; 
+            box-shadow: inset 0 0 10px rgba(255, 26, 26, 0.1);
+        }
+        
+        /* Zone Image avec bordure néon cramoisi */
+        .upload-zone { 
+            border: 2px dashed #ff1a1a; /* Rouge cramoisi dashed */
+            padding: 30px; 
+            text-align: center; 
+            color: #ff1a1a; /* Texte rouge */
+            cursor: pointer; 
+            margin-bottom: 20px; 
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(255, 26, 26, 0.3); /* Néon subtil */
+            transition: 0.3s;
+        }
+        .upload-zone:hover {
+            box-shadow: 0 0 20px rgba(255, 26, 26, 0.6);
+        }
+
+        /* Champs de saisie, textarea, select avec bordure néon cramoisi */
         input, textarea, select { 
-            width: 100%; background: #000; border: 1px solid #ff0033; color: white; 
-            padding: 10px; margin-bottom: 10px; border-radius: 4px; box-sizing: border-box;
-            font-size: 13px;
+            width: 100%; 
+            background: #000; 
+            border: 1px solid #ff1a1a; /* Bordure rouge cramoisi */
+            color: white; 
+            padding: 12px; 
+            margin-bottom: 10px; 
+            border-radius: 5px; 
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+            box-shadow: inset 0 0 5px rgba(255, 26, 26, 0.2);
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: #ff4d4d; /* Rouge plus clair au focus */
+            box-shadow: 0 0 10px rgba(255, 26, 26, 0.5); /* Néon plus fort */
         }
 
         .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        /* Bouton Enregistrer (plus fin et harmonieux) */
+        /* Bouton Enregistrer en néon cramoisi complet */
         button { 
-            background: #ff0033; color: white; border: none; padding: 12px; 
-            width: 100%; font-weight: bold; cursor: pointer; border-radius: 4px;
-            font-size: 14px; margin-top: 10px; transition: 0.3s;
+            background: #ff1a1a; /* Fond rouge */
+            color: white; 
+            border: 1px solid #ff4d4d;
+            padding: 15px; 
+            width: 100%; 
+            font-weight: bold; 
+            text-transform: uppercase; 
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(255, 26, 26, 0.6); /* Effet néon */
+            transition: 0.3s;
         }
-        button:hover { background: #cc0029; }
+        button:hover {
+            background: #cc0000;
+            box-shadow: 0 0 30px rgba(255, 26, 26, 0.8);
+        }
     </style>
 </head>
 <body>
@@ -50,26 +108,27 @@
     <h1>Article</h1>
 
     <div class="form-card">
-        <div class="upload-zone">📷 Ajouter un média</div>
+        <div class="upload-zone" onclick="alert('Fonctionnalité upload à venir')">
+            <p>📷 Ajouter un média</p>
+        </div>
+
         <input type="text" id="name" placeholder="Nom de l'article">
+        
         <div class="price-grid">
             <input type="number" id="price" placeholder="Prix CFA">
             <input type="number" id="old_price" placeholder="Prix avant réduction">
         </div>
-        <textarea id="desc" rows="3" placeholder="Ajoutez une description"></textarea>
+
+        <textarea id="desc" rows="4" placeholder="Ajoutez une description"></textarea>
+
         <select id="ribbon">
             <option>Ruban (ex: Promo, Nouveauté)</option>
+            <option value="promo">Promo</option>
+            <option value="nouveau">Nouveauté</option>
         </select>
-        <button id="add-btn">ENREGISTRER</button>
+
+        <button id="add-btn">Enregistrer</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const supabase = supabase.createClient('URL', 'KEY');
-        document.getElementById('add-btn').onclick = async () => {
-            alert("Sauvegarde en cours...");
-            // Logique d'ajout ici
-        };
-    </script>
 </body>
 </html>
