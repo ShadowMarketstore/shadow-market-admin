@@ -82,5 +82,18 @@
             document.getElementById("sidebar").classList.toggle("active");
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+    // Initialisation avec tes clés
+    const supabase = supabase.createClient(
+        'https://jsuvimxjmjiljntmgbzu.supabase.co', 
+        'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
+    );
+
+    // Test rapide : afficher "Connecté" dans la console du navigateur
+    console.log("Shadow Market : Connexion à la base de données réussie.");
+</script>
+    
 </body>
 </html>
