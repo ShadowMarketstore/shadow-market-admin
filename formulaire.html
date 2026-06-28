@@ -21,7 +21,7 @@
         }
         .menu-option:hover { background: #00ffff; color: #000; }
 
-        /* Astuce technique pour les mobiles : invisible mais détectable */
+        /* Rendre les inputs invisibles mais actifs pour les mobiles */
         .hidden-input {
             position: absolute;
             top: 0; left: 0;
@@ -77,64 +77,67 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        let supabase = null;
+        let supabaseClient = null;
         let uploadedImageUrl = "";
 
+        // Initialisation sans écraser l'objet global 'supabase'
         try {
-            // Remplace par tes vrais identifiants si tu veux tester la liaison réelle
-            supabase = supabase.createClient('URL', 'KEY');
+            // Remplace par tes vrais identifiants quand tu es prêt pour le cloud
+            if (typeof supabase !== 'undefined') {
+                supabaseClient = supabase.createClient('URL', 'KEY');
+            }
         } catch (e) {
-            console.log("Supabase indisponible pour l'instant");
+            console.log("Supabase en attente de configuration.");
         }
         
-        // Fonction globale appelée immédiatement après le choix du fichier
+        // Cette fonction s'exécute QUOI QU'IL ARRIVE dès qu'un fichier est choisi
         async function processFile(file) {
             if (!file) return;
 
-            // Masque le menu de sélection sur le champ visuel
+            // 1. On cache TOUT DE SUITE le menu pour libérer l'espace visuel
             document.getElementById('uploadMenu').style.display = 'none';
             
-            // Met à jour l'encadré
+            // 2. On change immédiatement le texte de l'encadré
             document.getElementById('uploadStatus').innerText = "✅ Sélectionné : " + file.name;
 
-            // Vérification de la configuration Supabase
-            if (supabase && supabase.options.supabaseUrl !== 'URL') {
+            // 3. Mode Upload ou Mode Démo
+            if (supabaseClient && supabaseClient.supabaseUrl !== 'URL') {
                 document.getElementById('uploadStatus').innerText = "⏳ Synchronisation de : " + file.name;
                 try {
-                    const { data, error } = await supabase.storage
+                    const { data, error } = await supabaseClient.storage
                         .from('products')
                         .upload(`public/${Date.now()}_${file.name}`, file);
 
                     if (error) {
-                        alert("Erreur Supabase : " + error.message);
-                        document.getElementById('uploadStatus').innerText = "❌ Échec de la synchronisation.";
+                        alert("Erreur stockage : " + error.message);
+                        document.getElementById('uploadStatus').innerText = "❌ Échec de l'envoi.";
                     } else {
-                        const { data: publicUrlData } = supabase.storage
+                        const { data: publicUrlData } = supabaseClient.storage
                             .from('products')
                             .getPublicUrl(data.path);
                         
                         uploadedImageUrl = publicUrlData.publicUrl;
-                        document.getElementById('uploadStatus').innerText = "✅ Média synchronisé !";
+                        document.getElementById('uploadStatus').innerText = "✅ En ligne : " + file.name;
                     }
                 } catch (err) {
                     console.error(err);
                 }
             } else {
-                // Mode démonstration locale si les clés d'API sont par défaut
-                uploadedImageUrl = "demo_mode_active";
-                alert("Mode Simulation local actif !\nFichier pris en compte : " + file.name);
+                // Si les clés 'URL' et 'KEY' ne sont pas modifiées, on simule pour laisser l'interface fluide
+                uploadedImageUrl = "demo_url_active";
+                alert("Sélection locale réussie : " + file.name + "\n(Le menu s'est fermé et l'affichage est mis à jour !)");
             }
         }
 
-        // Configuration des événements natifs de changement
+        // Liaison propre des écouteurs
         document.getElementById('cameraInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
         document.getElementById('galleryInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
         document.getElementById('fileInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
 
-        // Bouton d'enregistrement global
+        // Gestion du bouton Enregistrer
         document.getElementById('add-btn').onclick = async () => {
             if (!uploadedImageUrl) {
-                alert("Erreur : Veuillez d'abord ajouter un média avant d'enregistrer.");
+                alert("Veuillez d'abord sélectionner un média.");
                 return;
             }
 
@@ -147,15 +150,15 @@
                 image_url: uploadedImageUrl
             };
 
-            if (supabase && supabase.options.supabaseUrl !== 'URL') {
-                const { error } = await supabase.from('products').insert([dataToSave]);
-                if (error) alert("Erreur database : " + error.message);
+            if (supabaseClient && supabaseClient.supabaseUrl !== 'URL') {
+                const { error } = await supabaseClient.from('products').insert([dataToSave]);
+                if (error) alert("Erreur BDD : " + error.message);
                 else {
-                    alert("Produit enregistré avec succès !");
+                    alert("Produit enregistré !");
                     location.reload();
                 }
             } else {
-                alert("Simulé en local : Produit prêt !\nNom : " + dataToSave.name + "\nStatut : En attente des clés Supabase.");
+                alert("Simulé : Produit prêt à être inséré !\nNom : " + dataToSave.name);
             }
         };
     </script>
