@@ -26,6 +26,10 @@
         }
         .header-cell { font-weight: bold; color: #b0b0b0; background: #111; }
         
+        /* Design des cases vides (placeholders) */
+        .empty-row .cell::after { content: ""; width: 80%; height: 2px; background: #222; border-radius: 1px; }
+        .empty-img::after { width: 40px !important; height: 30px !important; background: #222 !important; }
+
         .product-img { width: 50px; height: 30px; background: #333; border-radius: 2px; }
         .sales-val { color: #00ffff; font-weight: bold; }
     </style>
@@ -39,7 +43,25 @@
         <div class="cell header-cell">NOM PRODUCT</div>
         <div class="cell header-cell">Ventes</div>
 
-        <div id="product-container" style="display: contents;"></div>
+        <div id="placeholder-container" style="display: contents;">
+            <div class="cell empty-row empty-img"></div>
+            <div class="cell empty-row"></div>
+            <div class="cell empty-row"></div>
+            
+            <div class="cell empty-row empty-img"></div>
+            <div class="cell empty-row"></div>
+            <div class="cell empty-row"></div>
+            
+            <div class="cell empty-row empty-img"></div>
+            <div class="cell empty-row"></div>
+            <div class="cell empty-row"></div>
+            
+            <div class="cell empty-row empty-img"></div>
+            <div class="cell empty-row"></div>
+            <div class="cell empty-row"></div>
+        </div>
+
+        <div id="product-container" style="display: contents; display: none;"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -51,10 +73,15 @@
 
         async function fetchProducts() {
             const { data } = await supabase.from('products').select('*');
-            const container = document.getElementById('product-container');
+            const placeholderContainer = document.getElementById('placeholder-container');
+            const productContainer = document.getElementById('product-container');
             
             if (data && data.length > 0) {
-                container.innerHTML = data.map(p => `
+                // Masquer le placeholder et afficher les produits
+                placeholderContainer.style.display = 'none';
+                productContainer.style.display = 'contents';
+                
+                productContainer.innerHTML = data.map(p => `
                     <div class="cell"><img src="${p.image_url || ''}" class="product-img"></div>
                     <div class="cell" style="justify-content: flex-start;">${p.name || p.nom || 'Produit'}</div>
                     <div class="cell sales-val">${p.sales_count || p.ventes || 0}</div>
