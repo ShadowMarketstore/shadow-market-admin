@@ -9,6 +9,7 @@
         .nav-bar a { color: white; text-decoration: none; font-size: 14px; }
         .form-card { background: #111; padding: 20px; border: 1px solid #333; border-radius: 10px; }
         
+        /* Zone Média */
         .upload-zone { border: 2px dashed #00ffff; padding: 30px; text-align: center; color: #00ffff; cursor: pointer; margin-bottom: 20px; border-radius: 5px; }
 
         /* Menu Options */
@@ -16,12 +17,13 @@
         .menu-option {
             width: 100%; background: #000; border: 1px solid #00ffff; color: #00ffff;
             padding: 12px; margin-bottom: 5px; cursor: pointer; text-align: center; display: block;
+            font-family: 'Courier New', Courier, monospace;
         }
         .menu-option:hover { background: #00ffff; color: #000; }
 
         input, textarea, select { width: 100%; background: #000; border: 1px solid #444; color: white; padding: 12px; margin-bottom: 10px; border-radius: 5px; box-sizing: border-box; }
         .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button#add-btn { background: #00ffff; color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        button#add-btn { background: #00ffff; color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; margin-top: 10px; box-shadow: 0 0 10px #00ffff; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -61,12 +63,16 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Fonction globale de gestion d'upload
-        function handleUpload(type) {
+        // Remplace par tes vraies clés Supabase
+        const supabase = supabase.createClient('URL', 'KEY');
+        
+        // Variable pour stocker le lien de l'image après upload
+        let uploadedImageUrl = "";
+
+        async function handleUpload(type) {
             const input = document.createElement('input');
             input.type = 'file';
             
-            // Configuration selon le type
             if (type === 'camera') {
                 input.setAttribute('capture', 'environment');
                 input.setAttribute('accept', 'image/*');
@@ -74,21 +80,58 @@
                 input.setAttribute('accept', 'image/*');
             }
 
-            input.onchange = (e) => {
-                if (e.target.files.length > 0) {
-                    alert("Fichier sélectionné : " + e.target.files[0].name);
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                alert("Upload en cours vers Supabase...");
+
+                // Envoi du fichier dans ton Bucket 'products'
+                const { data, error } = await supabase.storage
+                    .from('products')
+                    .upload(`public/${Date.now()}_${file.name}`, file);
+
+                if (error) {
+                    alert("Erreur d'upload : " + error.message);
+                } else {
+                    // On récupère l'URL d'accès public
+                    const { data: publicUrlData } = supabase.storage
+                        .from('products')
+                        .getPublicUrl(data.path);
+                    
+                    uploadedImageUrl = publicUrlData.publicUrl;
+                    alert("Image synchronisée avec succès !");
                     document.getElementById('uploadMenu').style.display = 'none'; // Ferme le menu
                 }
             };
-            input.click(); // Déclenche physiquement l'ouverture
+            input.click();
         }
 
-        // Ajout produit
+        // Enregistrement final du produit dans la table database
         document.getElementById('add-btn').onclick = async () => {
-            alert("Enregistrement en cours...");
-            // Logique Supabase ici
+            if (!uploadedImageUrl) {
+                alert("Erreur : Veuillez d'abord ajouter un média avant d'enregistrer.");
+                return;
+            }
+
+            const dataToSave = {
+                name: document.getElementById('name').value,
+                price: document.getElementById('price').value,
+                old_price: document.getElementById('old_price').value,
+                description: document.getElementById('desc').value,
+                ribbon: document.getElementById('ribbon').value,
+                image_url: uploadedImageUrl // Envoi de l'URL obtenue
+            };
+
+            const { error } = await supabase.from('products').insert([dataToSave]);
+            
+            if (error) {
+                alert("Erreur de base de données : " + error.message);
+            } else {
+                alert("Produit enregistré avec succès sur le Shadow Market !");
+                location.reload(); // Reset le formulaire
+            }
         };
     </script>
 </body>
 </html>
-
