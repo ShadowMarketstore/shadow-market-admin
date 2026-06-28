@@ -2,73 +2,83 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Shadow Market - Ajout</title>
+    <title>Shadow Market - Ajout Pro</title>
     <style>
-        body { background: #050505; color: #00ffff; font-family: 'Courier New', Courier, monospace; padding: 20px; }
-        h1 { text-align: center; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px #00ffff; }
+        body { background: #050505; color: #00ffff; font-family: 'Courier New', Courier, monospace; padding: 10px; margin: 0; }
+        .nav-bar { background: #111; padding: 15px; border-bottom: 2px solid #00ffff; display: flex; gap: 15px; margin-bottom: 20px; }
+        .nav-bar a { color: white; text-decoration: none; font-size: 14px; }
+
+        .form-card { background: #111; padding: 20px; border: 1px solid #333; border-radius: 10px; }
         
-        .box {
-            background: #111;
-            border: 2px solid #00ffff;
-            padding: 20px;
-            margin: 20px 0;
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
-            clip-path: polygon(5% 0%, 100% 0%, 100% 90%, 95% 100%, 0% 100%, 0% 10%);
+        .upload-zone { 
+            border: 2px dashed #00ffff; padding: 30px; text-align: center; 
+            color: #00ffff; cursor: pointer; margin-bottom: 20px; border-radius: 5px;
         }
 
-        input {
-            width: 100%;
-            background: #000;
-            border: 1px solid #00ffff;
-            color: #00ffff;
-            padding: 15px;
-            margin: 10px 0;
-            box-sizing: border-box;
-            outline: none;
+        input, textarea, select { 
+            width: 100%; background: #000; border: 1px solid #444; color: white; 
+            padding: 12px; margin-bottom: 10px; border-radius: 5px; box-sizing: border-box;
         }
 
-        button {
-            width: 100%;
-            background: #00ffff;
-            color: #000;
-            border: none;
-            padding: 15px;
-            font-weight: bold;
-            text-transform: uppercase;
-            cursor: pointer;
-            box-shadow: 0 0 20px #00ffff;
-            margin-top: 10px;
+        .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        button { 
+            background: #00ffff; color: #000; border: none; padding: 15px; 
+            width: 100%; font-weight: bold; text-transform: uppercase; cursor: pointer;
+            margin-top: 10px; box-shadow: 0 0 10px #00ffff;
         }
-
-        .success-msg { display: none; text-align: center; color: #0f0; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <nav>...</nav> <h1>Ajouter un produit</h1>
-    
-    <div class="box">
-        <label>Nom du produit</label>
-        <input type="text" id="name" placeholder="Ex: Item VIP">
+    <nav class="nav-bar">
+        <a href="index.html">Accueil</a>
+        <a href="produits.html">Stock</a>
+        <a href="formulaire.html" style="color: #00ffff;">Ajouter</a>
+    </nav>
+
+    <h1>Article</h1>
+
+    <div class="form-card">
+        <div class="upload-zone" onclick="alert('Fonctionnalité upload à venir')">
+            <p>📷 Ajouter un média</p>
+        </div>
+
+        <input type="text" id="name" placeholder="Nom de l'article">
         
-        <label>Lien de l'image</label>
-        <input type="text" id="image_url" placeholder="https://...">
-        
-        <label>Nombre de ventes</label>
-        <input type="number" id="sales_count" value="0">
-        
-        <button id="add-btn">Valider et Ajouter</button>
-        <div id="msg" class="success-msg">PRODUIT ENVOYÉ ! ✅</div>
+        <div class="price-grid">
+            <input type="number" id="price" placeholder="Prix CFA">
+            <input type="number" id="old_price" placeholder="Prix avant réduction">
+        </div>
+
+        <textarea id="desc" rows="4" placeholder="Ajoutez une description"></textarea>
+
+        <select id="ribbon">
+            <option>Ruban (ex: Promo, Nouveauté)</option>
+            <option value="promo">Promo</option>
+            <option value="nouveau">Nouveauté</option>
+        </select>
+
+        <button id="add-btn">Enregistrer</button>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Ton script Supabase reste identique...
         const supabase = supabase.createClient('URL', 'KEY');
 
         document.getElementById('add-btn').onclick = async () => {
-            // ... (logique d'ajout) ...
-            document.getElementById('msg').style.display = 'block';
+            const dataToSave = {
+                name: document.getElementById('name').value,
+                price: document.getElementById('price').value,
+                old_price: document.getElementById('old_price').value,
+                description: document.getElementById('desc').value,
+                ribbon: document.getElementById('ribbon').value
+            };
+
+            const { error } = await supabase.from('products').insert([dataToSave]);
+
+            if (error) alert("Erreur : " + error.message);
+            else alert("Produit enregistré !");
         };
     </script>
 </body>
