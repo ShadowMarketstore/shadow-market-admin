@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+6<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -80,45 +80,51 @@
         let supabaseClient = null;
         let uploadedImageUrl = "";
 
-        // Nettoyage strict de la clé pour éviter le bug "JWS Protected Header is invalid"
-        const rawKey = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4";
-        const cleanKey = rawKey.trim(); 
+        const supabaseUrl = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
+        const apiKey = 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWnbhdntbmdidSIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzgyNDY5NDU4LCJleHAiOjIwOTgwNDU0NTh9.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4'.trim();
 
         try {
             if (typeof supabase !== 'undefined') {
-                supabaseClient = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', cleanKey);
+                supabaseClient = supabase.createClient(supabaseUrl, apiKey);
             }
         } catch (e) {
-            console.error("Erreur initialisation Supabase : ", e);
+            console.error("Erreur initialisation : ", e);
         }
         
+        // Upload via requêtes HTTP directes pour contourner le bug "JWS Protected Header"
         async function processFile(file) {
             if (!file) return;
 
             document.getElementById('uploadMenu').style.display = 'none';
             document.getElementById('uploadStatus').innerText = "⏳ Synchronisation de : " + file.name;
 
-            if (supabaseClient) {
-                try {
-                    const { data, error } = await supabaseClient.storage
-                        .from('products')
-                        .upload(`public/${Date.now()}_${file.name}`, file);
+            const filePath = `public/${Date.now()}_${file.name}`;
+            const uploadUrl = `${supabaseUrl}/storage/v1/object/products/${filePath}`;
 
-                    if (error) {
-                        alert("Erreur Stockage : " + error.message);
-                        document.getElementById('uploadStatus').innerText = "❌ Échec de l'envoi.";
-                    } else {
-                        const { data: publicUrlData } = supabaseClient.storage
-                            .from('products')
-                            .getPublicUrl(data.path);
-                        
-                        uploadedImageUrl = publicUrlData.publicUrl;
-                        document.getElementById('uploadStatus').innerText = "✅ En ligne : " + file.name;
-                    }
-                } catch (err) {
-                    console.error(err);
-                    document.getElementById('uploadStatus').innerText = "❌ Erreur système.";
+            try {
+                const response = await fetch(uploadUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'apikey': apiKey,
+                        'Content-Type': file.type
+                    },
+                    body: file
+                });
+
+                if (response.ok) {
+                    // L'upload a réussi, on construit l'URL publique directement
+                    uploadedImageUrl = `${supabaseUrl}/storage/v1/object/public/products/${filePath}`;
+                    document.getElementById('uploadStatus').innerText = "✅ En ligne : " + file.name;
+                } else {
+                    const errData = await response.json();
+                    alert("Erreur Stockage Direct : " + (errData.message || response.statusText));
+                    document.getElementById('uploadStatus').innerText = "❌ Échec de l'envoi.";
                 }
+            } catch (err) {
+                console.error(err);
+                alert("Erreur réseau lors du transfert.");
+                document.getElementById('uploadStatus').innerText = "❌ Erreur réseau.";
             }
         }
 
@@ -154,4 +160,3 @@
     </script>
 </body>
 </html>
-
