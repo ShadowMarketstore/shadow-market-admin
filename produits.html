@@ -5,56 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shadow Market - Produits</title>
     <style>
-        body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 10px; margin: 0; }
-        h1 { color: #00ffff; border-bottom: 2px solid #00ffff; padding-bottom: 10px; font-size: 20px; }
+        body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 0; margin: 0; }
+        h1 { color: #00ffff; padding: 20px 20px 10px 20px; margin: 0; font-size: 22px; border-bottom: 2px solid #00ffff; }
 
-        /* Structure du tableau avec bordures */
-        .table-container {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
+        /* Conteneur principal */
+        .wrapper { width: 100%; padding: 20px; box-sizing: border-box; }
 
-        .row {
+        /* Le Tableau - Structure fixe */
+        .my-table {
             display: grid;
-            grid-template-columns: 80px 1fr 60px; /* 3 colonnes fixes */
-            border-bottom: 1px solid #333;
+            grid-template-columns: 80px 1fr 70px;
+            width: 100%;
+            border: 2px solid #333; /* Bordure extérieure épaisse */
         }
 
+        /* Les cellules du tableau */
         .cell {
-            padding: 15px 5px;
-            border-left: 1px solid #333;
+            padding: 15px 10px;
+            border-bottom: 1px solid #333;
             border-right: 1px solid #333;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 40px;
+            min-height: 50px;
         }
 
+        /* En-têtes */
         .header {
             background-color: #1a1a1a;
             font-weight: bold;
-            color: #b0b0b0;
-            border-top: 1px solid #333;
+            color: #00ffff;
+            text-transform: uppercase;
         }
 
-        /* Styles pour les produits */
-        .product-img { width: 60px; height: 40px; background: #222; border-radius: 4px; object-fit: cover; }
-        .sales-val { color: #00ffff; font-weight: bold; }
+        /* Styles produits */
+        .product-img { width: 60px; height: 40px; background: #333; border-radius: 4px; object-fit: cover; }
+        .sales { color: #ffffff; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <h1>Mes Produits</h1>
 
-    <div class="table-container">
-        <div class="row header">
-            <div class="cell">Image</div>
-            <div class="cell">NOM PRODUCT</div>
-            <div class="cell">Ventes</div>
-        </div>
+    <div class="wrapper">
+        <div class="my-table" id="table">
+            <div class="cell header">Image</div>
+            <div class="cell header">NOM PRODUCT</div>
+            <div class="cell header">Ventes</div>
 
-        <div id="product-container"></div>
+            <div id="product-container" style="display: contents;">
+                </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -64,21 +65,25 @@
             'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
         );
 
-        async function fetchProducts() {
+        async function loadData() {
             const { data } = await supabase.from('products').select('*');
             const container = document.getElementById('product-container');
-            
+
             if (data && data.length > 0) {
                 container.innerHTML = data.map(p => `
-                    <div class="row">
-                        <div class="cell"><img src="${p.image_url || ''}" class="product-img"></div>
-                        <div class="cell" style="justify-content: flex-start;">${p.name || p.nom || 'Produit'}</div>
-                        <div class="cell sales-val">${p.sales_count || p.ventes || 0}</div>
-                    </div>
+                    <div class="cell"><img src="${p.image_url || ''}" class="product-img"></div>
+                    <div class="cell" style="justify-content: flex-start;">${p.name || p.nom || 'Sans nom'}</div>
+                    <div class="cell sales">${p.sales_count || p.ventes || 0}</div>
                 `).join('');
+            } else {
+                // Lignes vides pour remplir le tableau si pas de produit
+                container.innerHTML = `
+                    <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+                    <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+                `;
             }
         }
-        fetchProducts();
+        loadData();
     </script>
 </body>
 </html>
