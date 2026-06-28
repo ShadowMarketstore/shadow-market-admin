@@ -1,1 +1,35 @@
 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Commandes</title>
+    <style>
+        body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 0; margin: 0; }
+        h1 { color: #00ffff; padding: 20px; margin: 0; font-size: 20px; border-bottom: 2px solid #00ffff; }
+        
+        .container { padding: 20px; }
+        .order-card { 
+            background: #1a1a1a; padding: 15px; margin-bottom: 10px; 
+            border-left: 4px solid #00ffff; border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav style="background: #111; padding: 15px; border-bottom: 2px solid #00ffff; display: flex; gap: 15px;">
+        <a href="index.html" style="color: white; text-decoration: none;">Accueil</a>
+        <a href="produits.html" style="color: white; text-decoration: none;">Stock</a>
+        <a href="formulaire.html" style="color: white; text-decoration: none;">Ajouter</a>
+        <a href="commande.html" style="color: #00ffff; text-decoration: none; font-weight: bold;">Commandes</a>
+    </nav>
+
+    <h1>Commandes récentes</h1>
+
+    <div class="container" id="orders-list">
+        <div class="order-card">Aucune commande pour le moment.</div>
+    </div>
+
+</body>
+</html>
