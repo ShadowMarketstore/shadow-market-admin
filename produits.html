@@ -3,20 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shadow Market - Debug</title>
+    <title>Shadow Market - Stock</title>
     <style>
-        <nav style="background: #111; padding: 15px; border-bottom: 2px solid #00ffff; margin-bottom: 20px; display: flex; gap: 15px;">
-    <a href="index.html" style="color: white; text-decoration: none;">Accueil</a>
-    <a href="produits.html" style="color: white; text-decoration: none;">Stock</a>
-    <a href="formulaire.html" style="color: white; text-decoration: none;">Ajouter</a>
-</nav>
-
+        /* Ici, uniquement le CSS */
         body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 0; margin: 0; }
         h1 { color: #00ffff; padding: 20px; margin: 0; font-size: 20px; border-bottom: 2px solid #00ffff; }
         
         .wrapper { width: 100%; padding: 10px; box-sizing: border-box; }
         
-        /* Grille forcé */
         .my-table {
             display: grid;
             grid-template-columns: 80px 1fr 70px;
@@ -40,7 +34,15 @@
     </style>
 </head>
 <body>
+
+    <nav style="background: #111; padding: 15px; border-bottom: 2px solid #00ffff; display: flex; gap: 15px;">
+        <a href="index.html" style="color: white; text-decoration: none;">Accueil</a>
+        <a href="produits.html" style="color: white; text-decoration: none;">Stock</a>
+        <a href="formulaire.html" style="color: white; text-decoration: none;">Ajouter</a>
+    </nav>
+
     <h1>Mes Produits</h1>
+    
     <div class="wrapper">
         <div class="my-table">
             <div class="cell header">Image</div>
@@ -61,8 +63,6 @@
 
         async function loadData() {
             const container = document.getElementById('product-container');
-            
-            // 1. Essayer de récupérer les données
             const { data, error } = await supabase.from('products').select('*');
             
             if (error) {
@@ -73,15 +73,11 @@
             if (data && data.length > 0) {
                 container.innerHTML = data.map(p => `
                     <div class="cell"><img src="${p.image_url || ''}" class="product-img"></div>
-                    <div class="cell" style="justify-content: flex-start;">${p.name || 'Produit test'}</div>
+                    <div class="cell" style="justify-content: flex-start;">${p.name || 'Produit'}</div>
                     <div class="cell">${p.sales_count || 0}</div>
                 `).join('');
             } else {
-                // 2. Lignes de test si la base est vide
-                container.innerHTML = `
-                    <div class="cell"><div class="product-img"></div></div><div class="cell">Produit Exemple 1</div><div class="cell">5</div>
-                    <div class="cell"><div class="product-img"></div></div><div class="cell">Produit Exemple 2</div><div class="cell">12</div>
-                `;
+                container.innerHTML = `<div class="cell" style="grid-column: span 3;">Aucun produit trouvé.</div>`;
             }
         }
         loadData();
