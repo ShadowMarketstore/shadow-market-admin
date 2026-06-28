@@ -21,7 +21,7 @@
         }
         .menu-option:hover { background: #00ffff; color: #000; }
 
-        /* Rendre les inputs invisibles mais actifs pour les mobiles */
+        /* Inputs invisibles mais actifs */
         .hidden-input {
             position: absolute;
             top: 0; left: 0;
@@ -80,26 +80,26 @@
         let supabaseClient = null;
         let uploadedImageUrl = "";
 
-        // Initialisation avec tes connexions réelles et validées
+        // Nettoyage strict de la clé pour éviter le bug "JWS Protected Header is invalid"
+        const rawKey = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4";
+        const cleanKey = rawKey.trim(); 
+
         try {
             if (typeof supabase !== 'undefined') {
-                supabaseClient = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', 'EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4');
+                supabaseClient = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', cleanKey);
             }
         } catch (e) {
-            console.error("Erreur d'initialisation : ", e);
+            console.error("Erreur initialisation Supabase : ", e);
         }
         
-        // Traitement automatique du fichier sélectionné
         async function processFile(file) {
             if (!file) return;
 
-            // On cache instantanément les boutons du menu
             document.getElementById('uploadMenu').style.display = 'none';
             document.getElementById('uploadStatus').innerText = "⏳ Synchronisation de : " + file.name;
 
             if (supabaseClient) {
                 try {
-                    // Upload direct vers ton bucket 'products'
                     const { data, error } = await supabaseClient.storage
                         .from('products')
                         .upload(`public/${Date.now()}_${file.name}`, file);
@@ -108,7 +108,6 @@
                         alert("Erreur Stockage : " + error.message);
                         document.getElementById('uploadStatus').innerText = "❌ Échec de l'envoi.";
                     } else {
-                        // Génération du lien de l'image
                         const { data: publicUrlData } = supabaseClient.storage
                             .from('products')
                             .getPublicUrl(data.path);
@@ -123,12 +122,10 @@
             }
         }
 
-        // Configuration des boutons mobiles
         document.getElementById('cameraInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
         document.getElementById('galleryInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
         document.getElementById('fileInput').addEventListener('change', function(e) { processFile(e.target.files[0]); });
 
-        // Envoi final des données de l'article
         document.getElementById('add-btn').onclick = async () => {
             if (!uploadedImageUrl) {
                 alert("Veuillez d'abord ajouter une image.");
