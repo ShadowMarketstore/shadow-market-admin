@@ -10,7 +10,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
         body { 
-            background: #000000; /* Noir pur style application mobile */
+            background: #000000; 
             color: #ffffff; 
             padding: 0; 
             margin: 0; 
@@ -51,7 +51,7 @@
             margin-bottom: 20px;
         }
 
-        /* Liste des produits style Wix Épuré */
+        /* Liste des produits Épurée */
         .product-list {
             display: flex;
             flex-direction: column;
@@ -59,7 +59,7 @@
 
         .product-item {
             background: #000000;
-            border-bottom: 1px solid #1c1c1e; /* Ligne de séparation fine */
+            border-bottom: 1px solid #1c1c1e; 
             padding: 14px 0;
             display: flex;
             align-items: center;
@@ -103,7 +103,6 @@
             color: #ff453a;
         }
 
-        /* Bouton trois points optionnels ou flèche style liste */
         .dots-menu {
             color: #8e8e93;
             font-size: 18px;
@@ -141,17 +140,9 @@
             box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
         }
 
-        /* Activation des animations */
-        .sliding-panel-overlay.open {
-            opacity: 1;
-            visibility: visible;
-        }
+        .sliding-panel-overlay.open { opacity: 1; visibility: visible; }
+        .sliding-panel.open { bottom: 0; }
 
-        .sliding-panel.open {
-            bottom: 0; 
-        }
-
-        /* Barre supérieure de glissement */
         .panel-handle {
             width: 36px;
             height: 5px;
@@ -238,11 +229,11 @@
         <div class="stat-grid">
             <div class="stat-box">
                 <div class="stat-label">Stock Actuel</div>
-                <div class="stat-value" id="panel-product-stock" style="color: #fff;">0</div>
+                <div class="stat-value" id="panel-product-stock">0</div>
             </div>
             <div class="stat-box">
-                <div class="stat-label">Articles vendus</div>
-                <div class="stat-value" id="panel-product-sales">0</div>
+                <div class="stat-label">Prix Final</div>
+                <div class="stat-value" id="panel-product-price" style="color: #00ffff;">0 CFA</div>
             </div>
         </div>
 
@@ -261,10 +252,10 @@
             const totalCount = document.getElementById('total-count');
             
             try {
-                // Requête corrigée sans la faute d'orthographe ou le champ manquant !
+                // APPEL SUR LES VRAIES COLONNES : product_name, stock_quantity, image_url, price
                 const { data: products, error } = await supabaseClient
                     .from('products')
-                    .select('name, stock_quantity, image_url'); 
+                    .select('product_name, stock_quantity, image_url, price'); 
 
                 if (error) throw error;
 
@@ -289,9 +280,9 @@
                         <div class="product-info-block">
                             <div class="product-img" style="background-image: url('${imgUrl}');"></div>
                             <div class="product-details">
-                                <div class="product-name">${product.name}</div>
+                                <div class="product-name">${product.product_name || 'Sans nom'}</div>
                                 <div class="product-stock ${stock <= 0 ? 'empty' : ''}">
-                                    ${stock <= 0 ? 'Rupture de stock' : 'En stock'}
+                                    ${stock <= 0 ? 'Rupture de stock' : `Stock : ${stock}`}
                                 </div>
                             </div>
                         </div>
@@ -308,8 +299,9 @@
         }
 
         function openPanel(product) {
-            document.getElementById('panel-product-name').innerText = product.name;
+            document.getElementById('panel-product-name').innerText = product.product_name || 'Sans nom';
             document.getElementById('panel-product-stock').innerText = product.stock_quantity || 0;
+            document.getElementById('panel-product-price').innerText = `${product.price || 0} CFA`;
             document.getElementById('panel-product-img').style.backgroundImage = `url('${product.image_url || ''}')`;
             
             document.getElementById('panel-overlay').classList.add('open');
