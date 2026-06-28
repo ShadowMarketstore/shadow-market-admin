@@ -15,6 +15,16 @@
             color: #00ffff; cursor: pointer; margin-bottom: 20px; border-radius: 5px;
         }
 
+        /* Style du menu d'upload */
+        #uploadMenu { 
+            display: none; background: #111; border: 1px solid #00ffff; 
+            padding: 10px; margin-bottom: 20px; border-radius: 5px; 
+        }
+        #uploadMenu button { 
+            display: block; width: 100%; margin-bottom: 10px; background: #222; 
+            color: #00ffff; border: 1px solid #00ffff; padding: 10px; cursor: pointer;
+        }
+
         input, textarea, select { 
             width: 100%; background: #000; border: 1px solid #444; color: white; 
             padding: 12px; margin-bottom: 10px; border-radius: 5px; box-sizing: border-box;
@@ -22,7 +32,7 @@
 
         .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        button { 
+        button#add-btn { 
             background: #00ffff; color: #000; border: none; padding: 15px; 
             width: 100%; font-weight: bold; text-transform: uppercase; cursor: pointer;
             margin-top: 10px; box-shadow: 0 0 10px #00ffff;
@@ -40,8 +50,14 @@
     <h1>Article</h1>
 
     <div class="form-card">
-        <div class="upload-zone" onclick="alert('Fonctionnalité upload à venir')">
+        <div class="upload-zone" onclick="document.getElementById('uploadMenu').style.display='block'">
             <p>📷 Ajouter un média</p>
+        </div>
+
+        <div id="uploadMenu">
+            <button onclick="handleUpload('camera')">Prendre une photo</button>
+            <button onclick="handleUpload('gallery')">Prendre dans la galerie</button>
+            <button onclick="handleUpload('file')">Sélectionner un fichier</button>
         </div>
 
         <input type="text" id="name" placeholder="Nom de l'article">
@@ -66,6 +82,21 @@
     <script>
         const supabase = supabase.createClient('URL', 'KEY');
 
+        // Gestion du menu et de l'upload
+        function handleUpload(type) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            if (type === 'camera') input.setAttribute('capture', 'environment');
+            else if (type === 'gallery') input.setAttribute('accept', 'image/*');
+            
+            input.onchange = (e) => {
+                alert("Fichier sélectionné : " + e.target.files[0].name);
+                document.getElementById('uploadMenu').style.display = 'none';
+                // Ici, tu appelleras ta fonction d'upload Supabase
+            };
+            input.click();
+        }
+
         document.getElementById('add-btn').onclick = async () => {
             const dataToSave = {
                 name: document.getElementById('name').value,
@@ -76,7 +107,6 @@
             };
 
             const { error } = await supabase.from('products').insert([dataToSave]);
-
             if (error) alert("Erreur : " + error.message);
             else alert("Produit enregistré !");
         };
