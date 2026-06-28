@@ -4,46 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shadow Market - Produits</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 15px; margin: 0; }
-        h1 { color: #00ffff; border-bottom: 2px solid #00ffff; padding-bottom: 10px; font-size: 22px; }
+        body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 10px; margin: 0; }
+        h1 { color: #00ffff; border-bottom: 2px solid #00ffff; padding-bottom: 10px; font-size: 20px; }
         
-        /* La grille adaptative */
-        .product-grid { 
+        /* Table structurée */
+        .product-table { 
             display: grid; 
-            grid-template-columns: 60px 1fr 70px; 
-            gap: 10px; 
-            align-items: center;
+            grid-template-columns: 80px 1fr 60px; /* Colonnes proportionnelles */
             width: 100%;
-            max-width: 800px; /* Limite la largeur sur ordi */
-            margin: 0 auto;   /* Centre le tout */
+            border-top: 1px solid #333;
+            border-left: 1px solid #333;
         }
-        
-        .header-row { font-weight: bold; color: #b0b0b0; border-bottom: 1px solid #333; padding: 10px 0; }
-        .product-item { background: #1a1a1a; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 8px; }
-        
-        .product-img { width: 50px; height: 50px; background: #333; border-radius: 4px; object-fit: cover; }
-        .sales-val { text-align: right; color: #00ffff; font-weight: bold; }
-        
-        /* Adaptation écran ordinateur */
-        @media (min-width: 600px) {
-            .product-grid { grid-template-columns: 100px 1fr 100px; gap: 20px; }
-            .product-img { width: 80px; height: 50px; }
+        .cell { 
+            padding: 10px; 
+            border-bottom: 1px solid #333; 
+            border-right: 1px solid #333; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
         }
+        .header-cell { font-weight: bold; color: #b0b0b0; background: #111; }
+        
+        .product-img { width: 50px; height: 30px; background: #333; border-radius: 2px; }
+        .sales-val { color: #00ffff; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <h1>Mes Produits</h1>
     
-    <div class="product-grid header-row">
-        <div>Image</div>
-        <div>Nom</div>
-        <div style="text-align: right;">Ventes</div>
-    </div>
+    <div class="product-table">
+        <div class="cell header-cell">Image</div>
+        <div class="cell header-cell">NOM PRODUCT</div>
+        <div class="cell header-cell">Ventes</div>
 
-    <div id="product-container"></div>
+        <div id="product-container" style="display: contents;"></div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
@@ -53,19 +50,15 @@
         );
 
         async function fetchProducts() {
-            const { data, error } = await supabase.from('products').select('*');
-            
+            const { data } = await supabase.from('products').select('*');
             const container = document.getElementById('product-container');
+            
             if (data && data.length > 0) {
                 container.innerHTML = data.map(p => `
-                    <div class="product-grid product-item">
-                        <img src="${p.image_url || ''}" class="product-img" onerror="this.style.display='none'">
-                        <div>${p.name || p.nom || 'Produit'}</div>
-                        <div class="sales-val">${p.sales_count || p.ventes || 0}</div>
-                    </div>
+                    <div class="cell"><img src="${p.image_url || ''}" class="product-img"></div>
+                    <div class="cell" style="justify-content: flex-start;">${p.name || p.nom || 'Produit'}</div>
+                    <div class="cell sales-val">${p.sales_count || p.ventes || 0}</div>
                 `).join('');
-            } else {
-                container.innerHTML = '<p style="text-align:center; color:#555;">Aucun produit trouvé.</p>';
             }
         }
         fetchProducts();
