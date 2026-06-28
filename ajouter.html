@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter un Produit</title>
+    <style>
+        body { background-color: #0a0a0a; color: white; font-family: sans-serif; padding: 20px; }
+        h1 { color: #00ffff; }
+        input { 
+            display: block; width: 100%; margin: 10px 0; padding: 12px; 
+            background: #1a1a1a; border: 1px solid #333; color: white; border-radius: 5px; 
+        }
+        button { 
+            background: #00ffff; color: #0a0a0a; border: none; padding: 15px; 
+            width: 100%; font-weight: bold; border-radius: 5px; cursor: pointer; 
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Ajouter un Produit</h1>
+    <input type="text" id="name" placeholder="Nom du produit">
+    <input type="text" id="image_url" placeholder="Lien de l'image (URL)">
+    <input type="number" id="sales_count" placeholder="Nombre de ventes">
+    <button onclick="addProduct()">Valider et Ajouter</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const supabase = supabase.createClient(
+            'https://jsuvimxjmjiljntmgbzu.supabase.co', 
+            'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
+        );
+
+        async function addProduct() {
+            const name = document.getElementById('name').value;
+            const image_url = document.getElementById('image_url').value;
+            const sales_count = document.getElementById('sales_count').value;
+
+            const { data, error } = await supabase
+                .from('products')
+                .insert([{ name, image_url, sales_count }]);
+
+            if (error) {
+                alert("Erreur : " + error.message);
+            } else {
+                alert("Produit ajouté avec succès !");
+                // Optionnel : vider les champs après ajout
+                document.querySelectorAll('input').forEach(i => i.value = '');
+            }
+        }
+    </script>
+</body>
+</html>
+
