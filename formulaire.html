@@ -10,11 +10,13 @@
 
         .form-card { background: #111; padding: 20px; border: 1px solid #333; border-radius: 10px; }
         
+        /* Zone Média */
         .upload-zone { 
             border: 2px dashed #00ffff; padding: 30px; text-align: center; 
             color: #00ffff; cursor: pointer; margin-bottom: 20px; border-radius: 5px;
         }
 
+        /* Menu Options (Visible/Caché) */
         #uploadMenu { display: none; margin-bottom: 20px; }
         .menu-option {
             width: 100%; background: #000; border: 1px solid #00ffff;
@@ -48,7 +50,7 @@
     <h1>Article</h1>
 
     <div class="form-card">
-        <div class="upload-zone" onclick="toggleMenu()" id="uploadZone">
+        <div class="upload-zone" onclick="document.getElementById('uploadMenu').style.display = 'block'">
             <p>📷 Ajouter un média</p>
         </div>
 
@@ -80,11 +82,6 @@
     <script>
         const supabase = supabase.createClient('URL', 'KEY');
 
-        function toggleMenu() {
-            const menu = document.getElementById('uploadMenu');
-            menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
-        }
-
         function handleUpload(type) {
             const input = document.createElement('input');
             input.type = 'file';
@@ -94,7 +91,8 @@
             input.onchange = (e) => {
                 if (e.target.files.length > 0) {
                     alert("Média prêt : " + e.target.files[0].name);
-                    toggleMenu();
+                    // Cache le menu après sélection
+                    document.getElementById('uploadMenu').style.display = 'none';
                 }
             };
             input.click();
@@ -115,3 +113,4 @@
     </script>
 </body>
 </html>
+
