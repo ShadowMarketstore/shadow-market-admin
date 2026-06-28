@@ -2,42 +2,45 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Shadow Market Admin</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { margin: 0; background-color: #0a0a0a; color: white; font-family: sans-serif; }
+        
+        /* Menu Burger */
+        .menu-btn { cursor: pointer; padding: 20px; font-size: 24px; }
+        
+        /* Sidebar */
+        .sidebar {
+            height: 100%; width: 0; position: fixed; z-index: 1; top: 0; left: 0;
+            background-color: #1a1a1a; overflow-x: hidden; transition: 0.5s;
+            padding-top: 60px; border-right: 2px solid #ff0000;
+        }
+        .sidebar a, .sidebar button {
+            padding: 15px 25px; text-decoration: none; font-size: 20px;
+            color: white; display: block; border: none; background: none; width: 100%; text-align: left;
+        }
+        .sidebar .add-btn { color: #ff0000; font-weight: bold; }
+        
+        /* Animation */
+        .sidebar.active { width: 250px; }
+    </style>
 </head>
 <body>
-    <h2>Ajouter un produit</h2>
-    <input type="text" id="name" placeholder="Nom du produit"><br>
-    <input type="number" id="price" placeholder="Prix"><br>
-    <input type="number" id="stock" placeholder="Stock"><br>
-    <button onclick="saveProduct()">Ajouter le produit</button>
+
+    <div class="menu-btn" onclick="toggleNav()">☰</div>
+
+    <div id="sidebar" class="sidebar">
+        <a href="#">Tableau de bord</a>
+        <button class="add-btn" onclick="addProduct()">+ Ajouter un produit</button>
+        <a href="#">Commandes</a>
+    </div>
 
     <script>
-        const supabase = supabase.createClient(
-            'https://jsuvimxjmjiljntmgbzu.supabase.co', 
-            'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
-        );
-
-        async function saveProduct() {
-            const { data, error } = await supabase.from('products').insert([
-                { 
-                    name: document.getElementById('name').value,
-                    price: document.getElementById('price').value,
-                    stock_quantity: document.getElementById('stock').value 
-                }
-            ]);
-
-            if (error) {
-                alert('Erreur : ' + error.message);
-            } else {
-                alert('Produit ajouté avec succès !');
-                // Optionnel : vider les champs après ajout
-                document.getElementById('name').value = '';
-                document.getElementById('price').value = '';
-                document.getElementById('stock').value = '';
-            }
+        function toggleNav() {
+            document.getElementById("sidebar").classList.toggle("active");
+        }
+        function addProduct() {
+            alert("Redirection vers le formulaire d'ajout...");
         }
     </script>
 </body>
 </html>
-
