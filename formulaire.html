@@ -4,58 +4,84 @@
     <meta charset="UTF-8">
     <title>Shadow Market - Ajout</title>
     <style>
-        body { background: #050505; color: #00ffff; font-family: 'Courier New', Courier, monospace; padding: 20px; margin: 0; }
-        h1 { color: #00ffff; text-transform: uppercase; text-shadow: 0 0 10px #00ffff; margin-bottom: 20px; }
+        body { 
+            background: #050505; 
+            color: #00ffff; 
+            font-family: 'Courier New', Courier, monospace; 
+            padding: 20px; 
+            margin: 0;
+        }
+        h1 { 
+            text-align: center; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+            text-shadow: 0 0 10px #00ffff; 
+        }
         
-        .form-card { background: #111; padding: 20px; border: 1px solid #00ffff; border-radius: 8px; }
-
-        /* Zones de saisie : Contour Cramoisi Néon */
-        .upload-zone, input, textarea, select { 
-            width: 100%; background: #000; border: 1px solid #ff0033; 
-            color: #00ffff; padding: 15px; margin-bottom: 10px; box-sizing: border-box;
-            box-shadow: 0 0 5px rgba(255, 0, 51, 0.3);
+        .box {
+            background: #111;
+            border: 2px solid #00ffff;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+            clip-path: polygon(5% 0%, 100% 0%, 100% 90%, 95% 100%, 0% 100%, 0% 10%);
         }
 
-        .upload-zone { border: 2px dashed #ff0033; text-align: center; cursor: pointer; color: #ff0033; }
+        label { display: block; margin-top: 15px; font-size: 0.9em; }
 
-        .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        input {
+            width: 100%;
+            background: #000;
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            padding: 15px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            outline: none;
+        }
 
-        /* Bouton Enregistrer : Fond Rouge, Texte Blanc */
-        button { 
-            width: 100%; background: #ff0033; color: #ffffff; border: none; 
-            padding: 15px; font-weight: bold; text-transform: uppercase; cursor: pointer;
+        button {
+            width: 100%;
+            background: #00ffff;
+            color: #000;
+            border: none;
+            padding: 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 0 20px #00ffff;
             margin-top: 10px;
         }
+
+        .success-msg { display: none; text-align: center; color: #0f0; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>Article</h1>
+    <h1>Ajouter un produit</h1>
     
-    <div class="form-card">
-        <div class="upload-zone">📷 Ajouter un média</div>
+    <div class="box">
+        <label>Nom du produit</label>
+        <input type="text" id="name" placeholder="Ex: Item VIP">
         
-        <input type="text" id="name" placeholder="Nom de l'article">
+        <label>Lien de l'image</label>
+        <input type="text" id="image_url" placeholder="https://...">
         
-        <div class="price-grid">
-            <input type="number" id="price" placeholder="Prix CFA">
-            <input type="number" id="old_price" placeholder="Prix avant réduction">
-        </div>
+        <label>Nombre de ventes</label>
+        <input type="number" id="sales_count" value="0">
         
-        <textarea id="desc" rows="3" placeholder="Ajoutez une description"></textarea>
-        
-        <select id="ribbon">
-            <option>Ruban (ex: Promo, Nouveauté)</option>
-        </select>
-        
-        <button id="add-btn">ENREGISTRER</button>
+        <button id="add-btn">Valider et Ajouter</button>
+        <div id="msg" class="success-msg">PRODUIT ENVOYÉ ! ✅</div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // Ton script Supabase
         const supabase = supabase.createClient('URL', 'KEY');
+
         document.getElementById('add-btn').onclick = async () => {
-            alert("Produit enregistré !");
+            // Logique d'ajout ici
+            document.getElementById('msg').style.display = 'block';
         };
     </script>
 </body>
