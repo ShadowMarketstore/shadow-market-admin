@@ -15,15 +15,13 @@
             color: #00ffff; cursor: pointer; margin-bottom: 20px; border-radius: 5px;
         }
 
-        /* Style du menu d'upload */
-        #uploadMenu { 
-            display: none; background: #111; border: 1px solid #00ffff; 
-            padding: 10px; margin-bottom: 20px; border-radius: 5px; 
+        #uploadMenu { display: none; margin-bottom: 20px; }
+        .menu-option {
+            width: 100%; background: #000; border: 1px solid #00ffff;
+            color: #00ffff; padding: 12px; margin-bottom: 5px; cursor: pointer;
+            text-align: center; font-family: 'Courier New', Courier, monospace;
         }
-        #uploadMenu button { 
-            display: block; width: 100%; margin-bottom: 10px; background: #222; 
-            color: #00ffff; border: 1px solid #00ffff; padding: 10px; cursor: pointer;
-        }
+        .menu-option:hover { background: #00ffff; color: #000; }
 
         input, textarea, select { 
             width: 100%; background: #000; border: 1px solid #444; color: white; 
@@ -50,14 +48,14 @@
     <h1>Article</h1>
 
     <div class="form-card">
-        <div class="upload-zone" onclick="document.getElementById('uploadMenu').style.display='block'">
+        <div class="upload-zone" onclick="toggleMenu()" id="uploadZone">
             <p>📷 Ajouter un média</p>
         </div>
 
         <div id="uploadMenu">
-            <button onclick="handleUpload('camera')">Prendre une photo</button>
-            <button onclick="handleUpload('gallery')">Prendre dans la galerie</button>
-            <button onclick="handleUpload('file')">Sélectionner un fichier</button>
+            <button class="menu-option" onclick="handleUpload('camera')">Prendre une photo</button>
+            <button class="menu-option" onclick="handleUpload('gallery')">Prendre dans la galerie</button>
+            <button class="menu-option" onclick="handleUpload('file')">Sélectionner un fichier</button>
         </div>
 
         <input type="text" id="name" placeholder="Nom de l'article">
@@ -82,7 +80,11 @@
     <script>
         const supabase = supabase.createClient('URL', 'KEY');
 
-        // Gestion du menu et de l'upload
+        function toggleMenu() {
+            const menu = document.getElementById('uploadMenu');
+            menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
+        }
+
         function handleUpload(type) {
             const input = document.createElement('input');
             input.type = 'file';
@@ -90,9 +92,10 @@
             else if (type === 'gallery') input.setAttribute('accept', 'image/*');
             
             input.onchange = (e) => {
-                alert("Fichier sélectionné : " + e.target.files[0].name);
-                document.getElementById('uploadMenu').style.display = 'none';
-                // Ici, tu appelleras ta fonction d'upload Supabase
+                if (e.target.files.length > 0) {
+                    alert("Média prêt : " + e.target.files[0].name);
+                    toggleMenu();
+                }
             };
             input.click();
         }
@@ -105,7 +108,6 @@
                 description: document.getElementById('desc').value,
                 ribbon: document.getElementById('ribbon').value
             };
-
             const { error } = await supabase.from('products').insert([dataToSave]);
             if (error) alert("Erreur : " + error.message);
             else alert("Produit enregistré !");
