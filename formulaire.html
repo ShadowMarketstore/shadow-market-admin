@@ -2,84 +2,78 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Shadow Market - Ajout Pro</title>
+    <title>Shadow Market - Liste</title>
     <style>
-        body { background: #050505; color: #00ffff; font-family: 'Courier New', Courier, monospace; padding: 10px; margin: 0; }
-        .nav-bar { background: #111; padding: 15px; border-bottom: 2px solid #00ffff; display: flex; gap: 15px; margin-bottom: 20px; }
-        .nav-bar a { color: white; text-decoration: none; font-size: 14px; }
-
-        .form-card { background: #111; padding: 20px; border: 1px solid #333; border-radius: 10px; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 20px; }
         
-        .upload-zone { 
-            border: 2px dashed #00ffff; padding: 30px; text-align: center; 
-            color: #00ffff; cursor: pointer; margin-bottom: 20px; border-radius: 5px;
+        /* Titre principal */
+        h1 { color: #00ffff; text-align: center; font-size: 24px; text-shadow: 0 0 10px #00ffff; margin-bottom: 30px; }
+
+        /* Conteneur global avec bordure cyan */
+        .main-container {
+            border: 2px solid #00ffff;
+            padding: 20px;
+            border-radius: 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
 
-        input, textarea, select { 
-            width: 100%; background: #000; border: 1px solid #444; color: white; 
-            padding: 12px; margin-bottom: 10px; border-radius: 5px; box-sizing: border-box;
+        /* Carte Produit */
+        .product-card {
+            background: #111;
+            border: 1px solid #333;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .product-card img { width: 100%; border-radius: 5px; margin-bottom: 10px; }
+        .product-name { font-weight: bold; margin-bottom: 5px; }
+        .product-info { color: #00ffff; font-size: 12px; margin-bottom: 5px; }
+
+        /* Bouton rouge cramoisi */
+        .action-btn {
+            background: #d61f43;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 5px;
         }
 
-        .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        
-        button { 
-            background: #00ffff; color: #000; border: none; padding: 15px; 
-            width: 100%; font-weight: bold; text-transform: uppercase; cursor: pointer;
-            margin-top: 10px; box-shadow: 0 0 10px #00ffff;
+        /* Barre de navigation bas */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: #000; border-top: 2px solid #00ffff;
+            display: flex; justify-content: space-around; padding: 15px;
         }
     </style>
 </head>
 <body>
 
-    <nav class="nav-bar">
-        <a href="index.html">Accueil</a>
-        <a href="produits.html">Stock</a>
-        <a href="formulaire.html" style="color: #00ffff;">Ajouter</a>
-    </nav>
+    <h1>LISTE DES PRODUITS</h1>
 
-    <h1>Article</h1>
-
-    <div class="form-card">
-        <div class="upload-zone" onclick="alert('Fonctionnalité upload à venir')">
-            <p>📷 Ajouter un média</p>
+    <div class="main-container">
+        <div class="product-card">
+            <img src="laptop.jpg" alt="Laptop">
+            <div class="product-name">HP ProBook 4440S</div>
+            <div class="product-info">RAM: 8 | Stockage: 350 Go</div>
+            <button class="action-btn">VOIR DÉTAILS</button>
         </div>
 
-        <input type="text" id="name" placeholder="Nom de l'article">
-        
-        <div class="price-grid">
-            <input type="number" id="price" placeholder="Prix CFA">
-            <input type="number" id="old_price" placeholder="Prix avant réduction">
+        <div class="product-card">
+            <img src="diamond.jpg" alt="VIP">
+            <div class="product-name">VIP Item</div>
+            <div class="product-info">Accès Premium Illimité</div>
+            <button class="action-btn">AJOUTER AU PANIER</button>
         </div>
-
-        <textarea id="desc" rows="4" placeholder="Ajoutez une description"></textarea>
-
-        <select id="ribbon">
-            <option>Ruban (ex: Promo, Nouveauté)</option>
-            <option value="promo">Promo</option>
-            <option value="nouveau">Nouveauté</option>
-        </select>
-
-        <button id="add-btn">Enregistrer</button>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const supabase = supabase.createClient('URL', 'KEY');
+    <div class="bottom-nav">
+        <span>👤</span> <span>🛒</span> <span>🏠</span> <span>💬</span>
+    </div>
 
-        document.getElementById('add-btn').onclick = async () => {
-            const dataToSave = {
-                name: document.getElementById('name').value,
-                price: document.getElementById('price').value,
-                old_price: document.getElementById('old_price').value,
-                description: document.getElementById('desc').value,
-                ribbon: document.getElementById('ribbon').value
-            };
-
-            const { error } = await supabase.from('products').insert([dataToSave]);
-
-            if (error) alert("Erreur : " + error.message);
-            else alert("Produit enregistré !");
-        };
-    </script>
 </body>
 </html>
