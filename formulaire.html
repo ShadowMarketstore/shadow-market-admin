@@ -63,8 +63,8 @@
 
         <input type="text" id="name" placeholder="Nom de l'article">
         <div class="price-grid">
-            <input type="number" id="price" placeholder="Prix CFA">
-            <input type="number" id="old_price" placeholder="Prix avant réduction">
+            <input type="number" id="price" placeholder="Prix (€)">
+            <input type="number" id="old_price" placeholder="Prix avant réduction (€)">
         </div>
         <textarea id="desc" rows="4" placeholder="Ajoutez une description"></textarea>
         <select id="ribbon">
@@ -82,7 +82,6 @@
 
         const supabaseUrl = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
         
-        // Ta clé est maintenant parfaitement intégrée ici
         const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4'.trim();
 
         // Initialisation du client Supabase
