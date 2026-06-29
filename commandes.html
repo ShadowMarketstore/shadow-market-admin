@@ -2,99 +2,44 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shadow Market - Gestion Commandes</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>DEBUG ADMIN</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; }
-        
-        /* Navigation */
-        .admin-nav { display: flex; justify-content: space-around; background: #111; padding: 15px; border-bottom: 1px solid #0ff; }
-        .nav-link { color: #fff; text-decoration: none; font-size: 20px; }
-        .nav-link.active { color: #0ff; }
-
-        .container { padding: 20px; }
-        h1 { color: #0ff; font-size: 22px; border-bottom: 1px solid #0ff; padding-bottom: 10px; }
-
-        /* Carte de commande complète */
-        .order-card { 
-            border: 1px solid #0ff; padding: 20px; margin-bottom: 20px; 
-            border-radius: 12px; background: #0a0a0a; position: relative; 
-        }
-        .star-btn { position: absolute; top: 20px; right: 20px; font-size: 28px; cursor: pointer; color: #333; }
-        .star-btn.active { color: #ffd700; }
-        
-        p { margin: 8px 0; font-size: 15px; }
-        strong { color: #0ff; }
+        body { background: #000; color: #0ff; font-family: monospace; padding: 20px; }
+        .log { border: 1px solid #0ff; padding: 10px; margin-top: 10px; }
     </style>
 </head>
 <body>
-
-    <nav class="admin-nav">
-        <a href="index.html" class="nav-link">🏠</a>
-        <a href="commandes.html" class="nav-link active">📋</a>
-    </nav>
-
-    <div class="container">
-        <h1>Liste des Commandes</h1>
-        <div id="admin-list">Chargement des données...</div>
-    </div>
+    <h1>CONSOLE DE DIAGNOSTIC</h1>
+    <div id="debug-zone" class="log">Démarrage...</div>
 
     <script>
-        const supabase = supabase.createClient(
-            'https://jsuvimxjmjiljntmgbzu.supabase.co', 
-            'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
-        );
+        const debugZone = document.getElementById('debug-zone');
+        const log = (msg) => debugZone.innerHTML += `<br>> ${msg}`;
 
-        async function loadAllOrders() {
-            const listElement = document.getElementById('admin-list');
-            
-            const { data, error } = await supabase
-                .from('orders')
-                .select('*')
-                .order('created_at', { ascending: false });
+        try {
+            const supabase = supabase.createClient(
+                'https://jsuvimxjmjiljntmgbzu.supabase.co', 
+                'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
+            );
+            log("Client Supabase initialisé.");
 
-            if (error) {
-                listElement.innerHTML = `<p style="color:red">Erreur : ${error.message}</p>`;
-                return;
+            async function test() {
+                log("Tentative de lecture de la table 'orders'...");
+                const { data, error } = await supabase.from('orders').select('*');
+                
+                if (error) {
+                    log("ERREUR SUPABASE: " + error.message);
+                } else {
+                    log("Connexion réussie !");
+                    log("Nombre de commandes trouvées : " + data.length);
+                    if(data.length > 0) log("Données reçues : OK");
+                }
             }
-
-            if (!data || data.length === 0) {
-                listElement.innerHTML = "<p>Aucune commande enregistrée.</p>";
-                return;
-            }
-
-            listElement.innerHTML = data.map(cmd => `
-                <div class="order-card">
-                    <i class="fas fa-star star-btn ${cmd.status === 'terminée' ? 'active' : ''}" 
-                       onclick="toggleStatus('${cmd.id}', '${cmd.status}')"></i>
-                    <p><strong>Client :</strong> ${cmd.customer_email || 'Non renseigné'}</p>
-                    <p><strong>Modèle :</strong> ${cmd.modele || 'N/A'}</p>
-                    <p><strong>Config :</strong> ${cmd.ram} Go RAM | ${cmd.stockage || 'N/A'}</p>
-                    <p><strong>OS :</strong> ${cmd.os || 'N/A'} | <strong>GPU :</strong> ${cmd.gpu || 'N/A'}</p>
-                    <p><strong>Message :</strong> ${cmd.message || 'Aucun'}</p>
-                    <p style="font-size: 12px; color: #666; margin-top: 10px;">Reçu le : ${new Date(cmd.created_at).toLocaleString()}</p>
-                </div>
-            `).join('');
+            test();
+        } catch (e) {
+            log("ERREUR FATALE: " + e.message);
         }
-
-        async function toggleStatus(id, currentStatus) {
-            const newStatus = (currentStatus === 'terminée') ? 'en attente' : 'terminée';
-            const { error } = await supabase
-                .from('orders')
-                .update({ status: newStatus })
-                .eq('id', id);
-
-            if (!error) {
-                loadAllOrders(); // Recharge l'affichage
-            } else {
-                alert("Erreur lors de la mise à jour : " + error.message);
-            }
-        }
-
-        // Chargement initial
-        loadAllOrders();
     </script>
 </body>
 </html>
