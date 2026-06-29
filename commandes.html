@@ -2,185 +2,84 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shadow Market - Articles</title>
+    <title>Shadow Market - Commandes</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        body { background: #000; color: #fff; font-family: sans-serif; padding: 20px; }
+        h1, h2 { color: #0ff; text-shadow: 0 0 5px #0ff; }
+        input, select, textarea { 
+            width: 100%; padding: 12px; margin: 8px 0; background: #111; 
+            border: 1px solid #0ff; color: #fff; border-radius: 4px; box-sizing: border-box;
         }
-        body { 
-            background: #000000; 
-            color: #ffffff; 
-            padding: 0; 
-            margin: 0; 
-            overflow-x: hidden;
+        button { 
+            background: #0ff; color: #000; border: none; padding: 12px; 
+            width: 100%; cursor: pointer; font-weight: bold; border-radius: 4px;
         }
-        
-        .nav-bar { 
-            background: #0a0a0a; 
-            padding: 15px; 
-            border-bottom: 1px solid #111; 
-            display: flex; 
-            gap: 20px; 
-        }
-        .nav-bar a { 
-            color: #666; 
-            text-decoration: none; 
-            font-size: 14px; 
-            font-weight: 500;
-        }
-        .nav-bar a.active {
-            color: #00ffff;
-        }
-        
-        .container { padding: 20px; }
-
-        h1 { color: #ffffff; font-size: 22px; margin: 0 0 5px 0; font-weight: 700; }
-        .sub-title { color: #8e8e93; font-size: 14px; margin-bottom: 20px; }
-
-        .product-list { display: flex; flex-direction: column; }
-        .product-item {
-            background: #000000;
-            border-bottom: 1px solid #1c1c1e; 
-            padding: 14px 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-        }
-        .product-info-block { display: flex; align-items: center; gap: 15px; }
-        .product-img {
-            width: 55px; height: 55px; border-radius: 8px;
-            background-size: cover; background-position: center; background-color: #1c1c1e;
-        }
-        .product-details { display: flex; flex-direction: column; gap: 4px; }
-        .product-name { font-weight: 600; font-size: 16px; color: #fff; }
-        .product-stock { font-size: 13px; color: #8e8e93; }
-        .product-stock.empty { color: #ff453a; }
-        .dots-menu { color: #8e8e93; font-size: 18px; padding-right: 5px; }
-
-        .sliding-panel-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);
-            opacity: 0; visibility: hidden; transition: opacity 0.3s ease; z-index: 999;
-        }
-        .sliding-panel {
-            position: fixed; bottom: -100%; left: 0; width: 100%;
-            background: #1c1c1e; border-top-left-radius: 16px; border-top-right-radius: 16px;
-            padding: 20px; transition: bottom 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-            z-index: 1000; max-height: 75%; overflow-y: auto;
-        }
-        .sliding-panel-overlay.open { opacity: 1; visibility: visible; }
-        .sliding-panel.open { bottom: 0; }
-        .panel-handle { width: 36px; height: 5px; background: #48484a; border-radius: 2.5px; margin: -5px auto 20px auto; }
-        .panel-title { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #fff; text-align: center; }
-        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; }
-        .stat-box { background: #2c2c2e; padding: 14px; border-radius: 10px; text-align: center; }
-        .stat-label { font-size: 12px; color: #aeaeb2; margin-bottom: 6px; text-transform: uppercase; }
-        .stat-value { font-size: 18px; font-weight: 600; color: #00ffff; }
-        .close-btn { background: #3a3a3c; color: #fff; border: none; padding: 14px; width: 100%; border-radius: 10px; font-weight: 600; margin-top: 20px; cursor: pointer; }
+        .order-card { border: 1px solid #0ff; padding: 15px; margin: 15px 0; border-radius: 5px; background: #0a0a0a; }
     </style>
 </head>
 <body>
 
-    <nav class="nav-bar">
-        <a href="index.html">Boutique</a>
-        <a href="formulaire.html">Ajouter un Article</a>
-        <a href="commande.html" class="active">Mes Produits</a>
-    </nav>
+    <h1>Gestion des Commandes</h1>
 
-    <div class="container">
-        <h1>Articles de la boutique</h1>
-        <div class="sub-title" id="total-count">Articles : --</div>
-        <div class="product-list" id="products-container">
-            <div style="text-align: center; padding: 40px; color: #8e8e93;">Chargement en cours...</div>
-        </div>
+    <div id="client-section">
+        <h3>Nouvelle demande sur mesure</h3>
+        <input type="text" id="modele" placeholder="Marque & Modèle">
+        <input type="text" id="ram" placeholder="RAM (Go)">
+        <input type="text" id="stockage" placeholder="Stockage">
+        <select id="os"><option>Windows 10</option><option>Windows 11</option><option>Linux</option></select>
+        <input type="text" id="gpu" placeholder="Carte Graphique">
+        <textarea id="message" placeholder="Détails/Optimisations..."></textarea>
+        <button onclick="submitOrder()">ENVOYER LA COMMANDE</button>
     </div>
 
-    <div class="sliding-panel-overlay" id="panel-overlay" onclick="closePanel()"></div>
+    <hr style="border: 0; border-top: 1px solid #333; margin: 40px 0;">
 
-    <div class="sliding-panel" id="details-panel">
-        <div class="panel-handle"></div>
-        <div class="panel-title" id="panel-product-name">Détails de l'article</div>
-        <div id="panel-product-img" style="width: 100%; height: 160px; border-radius: 10px; background-size: cover; background-position: center; margin-bottom: 20px; background-color: #000;"></div>
-        <div class="stat-grid">
-            <div class="stat-box">
-                <div class="stat-label">Stock Actuel</div>
-                <div class="stat-value" id="panel-product-stock">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Prix Final</div>
-                <div class="stat-value" id="panel-product-price">0 CFA</div>
-            </div>
-        </div>
-        <button class="close-btn" onclick="closePanel()">Fermer</button>
+    <div id="admin-section">
+        <h2>Commandes reçues</h2>
+        <div id="admin-list">Chargement des commandes...</div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const supabaseUrl = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
-        const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZimxjbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4'.trim();
-        const supabaseClient = supabase.createClient(supabaseUrl, apiKey);
+        const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        async function loadProducts() {
-            const container = document.getElementById('products-container');
-            const totalCount = document.getElementById('total-count');
-            try {
-                // CORRECTION : Utilisation de 'name' au lieu de 'product_name'
-                const { data: products, error } = await supabaseClient
-                    .from('products')
-                    .select('name, stock_quantity, image_url, price'); 
+        async function submitOrder() {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) { alert("Connecte-toi d'abord pour commander !"); return; }
 
-                if (error) throw error;
+            const order = {
+                customer_email: user.email,
+                modele: document.getElementById('modele').value,
+                ram: document.getElementById('ram').value,
+                stockage: document.getElementById('stockage').value,
+                os: document.getElementById('os').value,
+                gpu: document.getElementById('gpu').value,
+                message: document.getElementById('message').value
+            };
 
-                if (!products || products.length === 0) {
-                    totalCount.innerText = "Articles : 0";
-                    container.innerHTML = `<div style="text-align: center; padding: 40px; color: #8e8e93;">Aucun article trouvé.</div>`;
-                    return;
-                }
+            const { error } = await supabase.from('orders').insert([order]);
+            if (error) alert("Erreur : " + error.message);
+            else { alert("Commande reçue !"); location.reload(); }
+        }
 
-                totalCount.innerText = `Articles : ${products.length}`;
-                container.innerHTML = '';
-
-                products.forEach(product => {
-                    const stock = parseInt(product.stock_quantity) || 0;
-                    const item = document.createElement('div');
-                    item.className = 'product-item';
-                    item.onclick = () => openPanel(product);
-                    item.innerHTML = `
-                        <div class="product-info-block">
-                            <div class="product-img" style="background-image: url('${product.image_url || ''}');"></div>
-                            <div class="product-details">
-                                <div class="product-name">${product.name || 'Sans nom'}</div>
-                                <div class="product-stock ${stock <= 0 ? 'empty' : ''}">${stock <= 0 ? 'Rupture de stock' : `Stock : ${stock}`}</div>
-                            </div>
-                        </div>
-                        <div class="dots-menu">•••</div>
-                    `;
-                    container.appendChild(item);
-                });
-            } catch (err) {
-                console.error(err);
-                container.innerHTML = `<div style="text-align: center; color: #ff453a; padding: 30px;">Erreur lors de la synchronisation. Vérifie la console.</div>`;
+        async function loadOrders() {
+            const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+            const list = document.getElementById('admin-list');
+            if (data && data.length > 0) {
+                list.innerHTML = data.map(cmd => `
+                    <div class="order-card">
+                        <p><strong>Client :</strong> ${cmd.customer_email}</p>
+                        <p><strong>Config :</strong> ${cmd.modele} | RAM: ${cmd.ram}Go | ${cmd.os}</p>
+                        <p><strong>Besoin :</strong> ${cmd.message}</p>
+                    </div>
+                `).join('');
+            } else {
+                list.innerHTML = "Aucune commande pour le moment.";
             }
         }
-
-        function openPanel(product) {
-            document.getElementById('panel-product-name').innerText = product.name || 'Sans nom';
-            document.getElementById('panel-product-stock').innerText = product.stock_quantity || 0;
-            document.getElementById('panel-product-price').innerText = `${product.price || 0} CFA`;
-            document.getElementById('panel-product-img').style.backgroundImage = `url('${product.image_url || ''}')`;
-            document.getElementById('panel-overlay').classList.add('open');
-            document.getElementById('details-panel').classList.add('open');
-        }
-
-        function closePanel() {
-            document.getElementById('panel-overlay').classList.remove('open');
-            document.getElementById('details-panel').classList.remove('open');
-        }
-
-        window.onload = loadProducts;
+        loadOrders();
     </script>
 </body>
 </html>
