@@ -80,30 +80,37 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // 1. Fonction pour le menu Hamburger
         function toggleNav() {
             document.getElementById("sidebar").classList.toggle("active");
         }
 
+        // 2. Initialisation Supabase
         const supabase = supabase.createClient(
             'https://jsuvimxjmjiljntmgbzu.supabase.co', 
             'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
         );
 
+        // 3. Chargement des stats
         async function updateDashboardStats() {
-            // 1. Calcul du total des prix produits
-            const { data: products } = await supabase.from('products').select('price');
-            if (products) {
-                const total = products.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
-                document.getElementById('total-revenue').innerText = total + ' €';
-            }
+            try {
+                // Total revenus
+                const { data: products } = await supabase.from('products').select('price');
+                if (products) {
+                    const total = products.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+                    document.getElementById('total-revenue').innerText = total + ' €';
+                }
 
-            // 2. Récupération du nombre de commandes
-            const { count } = await supabase
-                .from('orders')
-                .select('*', { count: 'exact', head: true });
+                // Nombre de commandes
+                const { count } = await supabase
+                    .from('orders')
+                    .select('*', { count: 'exact', head: true });
 
-            if (count !== null) {
-                document.getElementById('total-orders').innerText = count;
+                if (count !== null) {
+                    document.getElementById('total-orders').innerText = count;
+                }
+            } catch (err) {
+                console.error("Erreur chargement stats:", err);
             }
         }
         
@@ -111,3 +118,4 @@
     </script>
 </body>
 </html>
+
