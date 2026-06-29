@@ -2,61 +2,62 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Mes Produits</title>
+    <title>Shadow Market - Stock</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        body { background: #000; color: #fff; font-family: sans-serif; }
         .grid-row { display: grid; grid-template-columns: 80px 1fr 80px; border-bottom: 1px solid #333; padding: 10px; align-items: center; }
-        .img-cell { width: 50px; height: 50px; object-fit: cover; }
-        .error-msg { color: red; padding: 20px; }
+        .img-cell { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
+        #debug-log { padding: 20px; font-family: monospace; color: #ff0; border: 1px solid #ff0; margin: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="product-list">Chargement des données...</div>
+    <h1>Stock</h1>
+    <div id="product-list">Chargement des produits...</div>
+    <div id="debug-log" style="display:none;"></div>
 
     <script>
-        // Initialisation du client Supabase
         const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZimxjbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4';
         
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const debug = document.getElementById('debug-log');
+        function log(msg) { 
+            debug.style.display = 'block';
+            debug.innerHTML += `<div>> ${msg}</div>`;
+        }
 
-        async function loadData() {
-            const container = document.getElementById('product-list');
-            
+        async function init() {
             try {
-                // Requête pour récupérer les données
+                log("Initialisation Supabase...");
+                const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+                log("Récupération des données...");
                 const { data, error } = await supabase
                     .from('products')
                     .select('name, image_url, sales_count');
 
-                if (error) {
-                    console.error("Erreur API :", error);
-                    container.innerHTML = `<div class="error-msg">Erreur de connexion : ${error.message}</div>`;
-                    return;
-                }
+                if (error) throw error;
 
-                if (!data || data.length === 0) {
-                    container.innerHTML = '<div>Aucun produit trouvé.</div>';
-                    return;
-                }
-
-                // Génération du tableau
-                container.innerHTML = data.map(p => `
+                log("Données reçues ! Affichage...");
+                const list = document.getElementById('product-list');
+                list.innerHTML = data.map(p => `
                     <div class="grid-row">
                         <div><img src="${p.image_url || ''}" class="img-cell" onerror="this.style.display='none'"></div>
-                        <div>${p.name || 'Sans nom'}</div>
-                        <div>${p.sales_count !== null ? p.sales_count : 0}</div>
+                        <div>${p.name || 'Produit'}</div>
+                        <div>${p.sales_count ?? 0}</div>
                     </div>
                 `).join('');
+                
+                // Si tout va bien, on cache le debug
+                debug.style.display = 'none';
 
             } catch (err) {
-                container.innerHTML = `<div class="error-msg">Erreur système : ${err.message}</div>`;
+                log("ERREUR : " + err.message);
             }
         }
 
-        // Exécution au chargement complet de la page
-        document.addEventListener('DOMContentLoaded', loadData);
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
