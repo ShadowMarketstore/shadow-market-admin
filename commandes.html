@@ -11,35 +11,50 @@
 </head>
 <body>
     <h1>CONSOLE DE DIAGNOSTIC</h1>
-    <div id="debug-zone" class="log">Démarrage...</div>
+    <div id="debug-zone" class="log">Initialisation...</div>
 
     <script>
         const debugZone = document.getElementById('debug-zone');
         const log = (msg) => debugZone.innerHTML += `<br>> ${msg}`;
 
-        try {
-            const supabase = supabase.createClient(
-                'https://jsuvimxjmjiljntmgbzu.supabase.co', 
-                'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
-            );
-            log("Client Supabase initialisé.");
+        // Sécurité : on attend que l'objet supabase soit réellement disponible
+        function checkSupabase() {
+            if (typeof supabase === 'undefined') {
+                log("Attente du chargement de la librairie...");
+                setTimeout(checkSupabase, 500); // Réessaie toutes les 500ms
+                return;
+            }
+            
+            // Si on arrive ici, c'est que supabase est chargé
+            log("Librairie chargée.");
+            initApp();
+        }
 
-            async function test() {
-                log("Tentative de lecture de la table 'orders'...");
-                const { data, error } = await supabase.from('orders').select('*');
+        async function initApp() {
+            try {
+                const client = supabase.createClient(
+                    'https://jsuvimxjmjiljntmgbzu.supabase.co', 
+                    'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
+                );
+                log("Client initialisé.");
+
+                log("Lecture de 'orders'...");
+                const { data, error } = await client.from('orders').select('*');
                 
                 if (error) {
                     log("ERREUR SUPABASE: " + error.message);
                 } else {
-                    log("Connexion réussie !");
-                    log("Nombre de commandes trouvées : " + data.length);
-                    if(data.length > 0) log("Données reçues : OK");
+                    log("Succès ! Nombre de commandes : " + data.length);
+                    // Si on a des données, on les affiche pour prouver que ça marche
+                    if(data.length > 0) log("Dernière commande : " + data[0].customer_email);
                 }
+            } catch (e) {
+                log("ERREUR FATALE: " + e.message);
             }
-            test();
-        } catch (e) {
-            log("ERREUR FATALE: " + e.message);
         }
+
+        // Lancement
+        checkSupabase();
     </script>
 </body>
 </html>
