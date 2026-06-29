@@ -10,15 +10,15 @@
         body { background: #000; color: #fff; font-family: sans-serif; padding: 20px; }
         h1 { color: #0ff; font-size: 20px; border-bottom: 1px solid #0ff; padding-bottom: 10px; }
         
-        /* Compteurs */
         .stats-row { display: flex; gap: 10px; margin-bottom: 20px; }
         .stat-box { background: #1a1a1a; padding: 10px; border: 1px solid #0ff; border-radius: 8px; flex: 1; text-align: center; }
         .stat-val { font-size: 18px; color: #0ff; font-weight: bold; }
-        .stat-label { font-size: 10px; color: #aaa; }
+        .stat-label { font-size: 10px; color: #aaa; text-transform: uppercase; }
 
         .order-card { border: 1px solid #0ff; padding: 15px; margin-bottom: 15px; border-radius: 10px; background: #0a0a0a; position: relative; }
         .star-btn { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: #444; }
         .star-btn.active { color: #ffd700; }
+        .empty-msg { text-align: center; color: #666; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -30,7 +30,7 @@
         <div class="stat-box"><div class="stat-label">Terminées</div><div id="count-done" class="stat-val">0</div></div>
     </div>
 
-    <div id="admin-list">Chargement...</div>
+    <div id="admin-list">Chargement des commandes...</div>
 
     <script>
         const supabase = supabase.createClient(
@@ -39,35 +39,45 @@
         );
 
         async function loadOrders() {
-            const { data, error } = await supabase
-                .from('orders')
-                .select('*')
-                .order('created_at', { ascending: false });
+            const list = document.getElementById('admin-list');
+            try {
+                // On récupère toutes les commandes
+                const { data, error } = await supabase
+                    .from('orders')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-            if (error) return;
+                if (error) throw error;
 
-            const total = data.length;
-            const done = data.filter(c => c.status === 'terminée').length;
+                if (!data || data.length === 0) {
+                    list.innerHTML = '<div class="empty-msg">Aucune commande pour le moment.</div>';
+                    return;
+                }
 
-            document.getElementById('count-total').innerText = total;
-            document.getElementById('count-done').innerText = done;
+                // Mise à jour des stats
+                document.getElementById('count-total').innerText = data.length;
+                document.getElementById('count-done').innerText = data.filter(c => c.status === 'terminée').length;
 
-            document.getElementById('admin-list').innerHTML = data.map(cmd => `
-                <div class="order-card">
-                    <i class="fas fa-star star-btn ${cmd.status === 'terminée' ? 'active' : ''}" 
-                       onclick="toggleStatus('${cmd.id}', '${cmd.status}')"></i>
-                    <p><strong>Email:</strong> ${cmd.customer_email}</p>
-                    <p><strong>Config:</strong> ${cmd.modele} | ${cmd.ram}Go RAM</p>
-                    <p><strong>Détails:</strong> ${cmd.stockage} | ${cmd.os} | GPU: ${cmd.gpu}</p>
-                    <p><strong>Message:</strong> ${cmd.message || 'Aucun'}</p>
-                </div>
-            `).join('');
+                // Génération des cartes
+                list.innerHTML = data.map(cmd => `
+                    <div class="order-card">
+                        <i class="fas fa-star star-btn ${cmd.status === 'terminée' ? 'active' : ''}" 
+                           onclick="toggleStatus('${cmd.id}', '${cmd.status}')"></i>
+                        <p><strong>Email:</strong> ${cmd.customer_email || 'N/A'}</p>
+                        <p><strong>Modèle:</strong> ${cmd.modele || 'N/A'}</p>
+                        <p><strong>Config:</strong> ${cmd.ram || '0'}Go | ${cmd.stockage || 'N/A'}</p>
+                        <p><strong>Message:</strong> ${cmd.message || 'Aucun'}</p>
+                    </div>
+                `).join('');
+            } catch (err) {
+                list.innerHTML = `<div class="empty-msg">Erreur : ${err.message}</div>`;
+            }
         }
 
         async function toggleStatus(id, currentStatus) {
             const newStatus = (currentStatus === 'terminée') ? 'en attente' : 'terminée';
             await supabase.from('orders').update({ status: newStatus }).eq('id', id);
-            loadOrders(); // Rafraîchir l'affichage
+            loadOrders(); // Recharge pour mettre à jour l'étoile et les stats
         }
 
         loadOrders();
