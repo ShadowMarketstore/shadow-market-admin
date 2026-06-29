@@ -2,59 +2,55 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Shadow Market - Admin</title>
+    <title>Admin Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; padding: 20px; }
         .stats { display: flex; gap: 20px; margin-bottom: 20px; }
         .stat-card { border: 1px solid #0ff; padding: 15px; border-radius: 8px; flex: 1; text-align: center; }
-        .order-card { border: 1px solid #333; padding: 15px; margin-bottom: 10px; border-radius: 8px; background: #111; }
+        #debug { color: yellow; margin-bottom: 10px; font-size: 12px; }
+        .order-card { border: 1px solid #333; padding: 10px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
-    <h1>Dashboard Admin</h1>
+    <h1>Admin Dashboard</h1>
     <div class="stats">
         <div class="stat-card">Total: <span id="total">0</span></div>
         <div class="stat-card">Traités: <span id="traite">0</span></div>
     </div>
-    <div id="debug-log" style="color: yellow; font-size: 12px; margin-bottom: 10px;"></div>
-    <div id="list">Chargement...</div>
+    <div id="debug">Initialisation...</div>
+    <div id="list"></div>
 
     <script>
-        const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        const debug = document.getElementById('debug-log');
+        const supabase = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', 'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX');
+        const debug = document.getElementById('debug');
 
-        async function init() {
+        async function loadData() {
             try {
-                debug.innerText = "Connexion à Supabase...";
+                debug.innerText = "Récupération des données...";
+                
+                // Appel direct sans filtre pour tester la connexion
                 const { data, error } = await supabase.from('orders').select('*');
                 
                 if (error) {
-                    debug.innerText = "ERREUR API: " + error.message;
+                    debug.innerText = "ERREUR SUPABASE: " + error.message;
                     return;
                 }
-
-                debug.innerText = "Données reçues : " + (data ? data.length : 0) + " commandes.";
                 
-                // Mettre à jour les compteurs
-                document.getElementById('total').innerText = data.length;
-                document.getElementById('traite').innerText = data.filter(o => o.status === 'terminée').length;
-
-                // Afficher la liste
-                document.getElementById('list').innerHTML = data.map(o => `
-                    <div class="order-card">
-                        <strong>${o.customer_email}</strong><br>
-                        Modèle: ${o.modele} | Statut: ${o.status}
-                    </div>
-                `).join('');
-
+                debug.innerText = "Données reçues: " + (data ? data.length : 0);
+                
+                if (data && data.length > 0) {
+                    document.getElementById('total').innerText = data.length;
+                    document.getElementById('traite').innerText = data.filter(o => o.status === 'terminée').length;
+                    document.getElementById('list').innerHTML = data.map(o => `
+                        <div class="order-card">Email: ${o.customer_email || 'Inconnu'}</div>
+                    `).join('');
+                }
             } catch (e) {
-                debug.innerText = "ERREUR CRITIQUE: " + e.message;
+                debug.innerText = "ERREUR SCRIPT: " + e.message;
             }
         }
-        init();
+        loadData();
     </script>
 </body>
 </html>
