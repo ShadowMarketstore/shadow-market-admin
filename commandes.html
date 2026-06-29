@@ -14,108 +14,93 @@
         .stat-card { border: 1px solid var(--main-color); padding: 20px; border-radius: 12px; flex: 1; text-align: center; }
         .stat-value { font-size: 28px; font-weight: bold; color: var(--main-color); }
         .order-list { display: flex; flex-direction: column; gap: 15px; }
-        .order-card { background: #151515; border-left: 4px solid var(--main-color); padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .order-card { background: #151515; border-left: 4px solid var(--main-color); padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); cursor: pointer; }
         .order-info strong { color: var(--main-color); font-size: 1.1em; }
         .order-actions { display: flex; gap: 15px; align-items: center; }
         .btn-action { cursor: pointer; font-size: 20px; transition: 0.3s; }
         .btn-action:hover { transform: scale(1.2); }
         .status-badge { font-size: 12px; padding: 5px 12px; border-radius: 20px; background: #333; text-transform: uppercase; }
-        #debug { font-size: 12px; margin-bottom: 10px; padding: 8px; border-radius: 6px; }
-        .debug-ok { color: #0f0; }
-        .debug-err { color: #f44; background: #1a0000; border: 1px solid #f44; }
-        .debug-info { color: yellow; }
+        
+        /* Modal Style */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: #151515; border: 1px solid var(--main-color); padding: 25px; border-radius: 12px; max-width: 500px; margin: 50px auto; position: relative; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>Dashboard Admin</h1>
-        <a href="index.html" style="color:var(--main-color); text-decoration:none;"><i class="fas fa-home"></i> Retour Accueil</a>
+        <a href="index.html" style="color:var(--main-color); text-decoration:none;"><i class="fas fa-home"></i> Retour</a>
     </div>
 
-    <div id="debug" class="debug-info">Initialisation...</div>
+    <div id="debug" style="color:yellow; font-size: 12px; margin-bottom: 10px;"></div>
 
     <div class="stats-container">
-        <div class="stat-card">Total<br><div id="total" class="stat-value">—</div></div>
-        <div class="stat-card">Traités<br><div id="traite" class="stat-value">—</div></div>
+        <div class="stat-card">Total<br><div id="total" class="stat-value">0</div></div>
+        <div class="stat-card">Traités<br><div id="traite" class="stat-value">0</div></div>
     </div>
 
     <div id="order-list" class="order-list">Chargement...</div>
 
+    <div id="modal" class="modal" onclick="this.style.display='none'">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 id="modal-title" style="color:var(--main-color)">Détails</h2>
+            <div id="modal-body" style="line-height: 1.6;"></div>
+            <button style="margin-top:20px; background:var(--main-color); border:none; padding:10px 20px; cursor:pointer;" onclick="document.getElementById('modal').style.display='none'">Fermer</button>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX';
-
-        // ✅ FIX CRITIQUE : variable renommée "db" pour éviter le conflit avec le namespace "supabase"
         const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
         const debug = document.getElementById('debug');
 
-        function setDebug(msg, type = 'info') {
-            debug.className = 'debug-' + type;
-            debug.innerText = msg;
-        }
-
         async function loadData() {
-            setDebug('Connexion à Supabase...', 'info');
+            debug.innerText = "Connexion...";
             try {
-                const { data, error } = await db
-                    .from('orders')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
+                const { data, error } = await db.from('orders').select('*').order('created_at', { ascending: false });
                 if (error) throw error;
 
-                setDebug(`✅ ${data.length} commande(s) chargée(s).`, 'ok');
-
+                debug.innerText = `✅ ${data.length} commandes chargées.`;
                 document.getElementById('total').innerText = data.length;
                 document.getElementById('traite').innerText = data.filter(o => o.status === 'terminée').length;
 
-                const container = document.getElementById('order-list');
-                if (data.length === 0) {
-                    container.innerHTML = "<p style='color:#888'>Aucune commande enregistrée.</p>";
-                    return;
-                }
-
-                container.innerHTML = data.map(o => `
-                    <div class="order-card">
+                document.getElementById('order-list').innerHTML = data.map(o => `
+                    <div class="order-card" onclick="showDetails('${o.id}')">
                         <div class="order-info">
-                            <strong>${o.customer_email || 'Email non fourni'}</strong><br>
+                            <strong>${o.customer_email || 'Inconnu'}</strong><br>
                             <small>${o.modele || 'N/A'} | RAM: ${o.ram || '?'}Go</small>
                         </div>
                         <div class="order-actions">
-                            <span class="status-badge">${o.status || 'inconnu'}</span>
-                            <i class="fas fa-check-circle btn-action" style="color:green" title="Marquer terminée" onclick="updateStatus('${o.id}', 'terminée')"></i>
-                            <i class="fas fa-trash btn-action" style="color:red" title="Supprimer" onclick="deleteOrder('${o.id}')"></i>
+                            <span class="status-badge">${o.status || '...'}</span>
+                            <i class="fas fa-trash btn-action" style="color:red" onclick="event.stopPropagation(); deleteOrder('${o.id}')"></i>
                         </div>
                     </div>
                 `).join('');
-
             } catch (err) {
-                setDebug('❌ Erreur : ' + err.message, 'err');
-                document.getElementById('order-list').innerHTML = `<p style="color:#f44">Impossible de charger les commandes.<br><small>${err.message}</small></p>`;
-                document.getElementById('total').innerText = '!';
-                document.getElementById('traite').innerText = '!';
-            }
-        }
-
-        async function updateStatus(id, newStatus) {
-            const { error } = await db.from('orders').update({ status: newStatus }).eq('id', id);
-            if (error) {
-                alert('Erreur mise à jour : ' + error.message);
-            } else {
-                loadData();
+                debug.innerText = "Erreur : " + err.message;
             }
         }
 
         async function deleteOrder(id) {
-            if (confirm('Confirmer la suppression définitive ?')) {
+            if(confirm('Supprimer cette commande définitivement ?')) {
                 const { error } = await db.from('orders').delete().eq('id', id);
-                if (error) {
-                    alert('Erreur suppression : ' + error.message);
-                } else {
-                    loadData();
-                }
+                if(error) alert(error.message); else loadData();
+            }
+        }
+
+        async function showDetails(id) {
+            const { data, error } = await db.from('orders').select('*').eq('id', id).single();
+            if(data) {
+                document.getElementById('modal-title').innerText = "Commande : " + data.customer_email;
+                document.getElementById('modal-body').innerHTML = `
+                    <p><strong>Modèle :</strong> ${data.modele}</p>
+                    <p><strong>RAM :</strong> ${data.ram} Go</p>
+                    <p><strong>Statut :</strong> ${data.status}</p>
+                    <p><strong>Date :</strong> ${new Date(data.created_at).toLocaleString()}</p>
+                `;
+                document.getElementById('modal').style.display = 'block';
             }
         }
 
@@ -123,3 +108,4 @@
     </script>
 </body>
 </html>
+
