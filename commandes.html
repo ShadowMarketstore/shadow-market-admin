@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shadow Market - Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -9,28 +10,28 @@
         h1 { color: #0ff; text-shadow: 0 0 10px #0ff; border-bottom: 1px solid #0ff; padding-bottom: 10px; }
         #admin-list { margin-top: 20px; }
         .order-card { 
-            border: 1px solid #0ff; padding: 20px; margin-bottom: 15px; 
-            border-radius: 10px; background: #0a0a0a; display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #0ff; padding: 15px; margin-bottom: 15px; 
+            border-radius: 10px; background: #0a0a0a;
         }
-        .debug-error { color: #ff0000; border: 1px solid #ff0000; padding: 10px; margin-bottom: 20px; }
+        .order-card p { margin: 5px 0; font-size: 14px; }
+        .debug-error { color: #ff0000; border: 1px solid #ff0000; padding: 10px; }
     </style>
 </head>
 <body>
 
     <h1>Gestion des Commandes</h1>
-
     <div id="admin-list">Chargement des commandes...</div>
 
     <script>
-        const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabase = supabase.createClient(
+            'https://jsuvimxjmjiljntmgbzu.supabase.co', 
+            'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
+        );
 
         async function loadOrders() {
             const list = document.getElementById('admin-list');
             
             try {
-                // Requête de récupération des commandes
                 const { data, error } = await supabase
                     .from('orders')
                     .select('*')
@@ -45,17 +46,16 @@
 
                 list.innerHTML = data.map(cmd => `
                     <div class="order-card">
-                        <div>
-                            <p><strong>Client :</strong> ${cmd.customer_email || 'Non renseigné'}</p>
-                            <p><strong>Config :</strong> ${cmd.modele || 'N/A'} | ${cmd.ram || 'N/A'}Go RAM</p>
-                            <p><strong>Message :</strong> ${cmd.message || 'Aucun'}</p>
-                        </div>
+                        <p><strong>Email :</strong> ${cmd.customer_email || 'N/A'}</p>
+                        <p><strong>Modèle :</strong> ${cmd.modele || 'N/A'}</p>
+                        <p><strong>Config :</strong> ${cmd.ram || '0'}Go RAM | ${cmd.stockage || 'N/A'}</p>
+                        <p><strong>Système :</strong> ${cmd.os || 'N/A'} | <strong>GPU :</strong> ${cmd.gpu || 'N/A'}</p>
+                        <p><strong>Message :</strong> ${cmd.message || 'Aucun'}</p>
                     </div>
                 `).join('');
             
             } catch (err) {
-                console.error("Erreur Admin :", err);
-                list.innerHTML = `<div class="debug-error">Erreur de chargement des commandes : ${err.message}</div>`;
+                list.innerHTML = `<div class="debug-error">Erreur : ${err.message}</div>`;
             }
         }
 
