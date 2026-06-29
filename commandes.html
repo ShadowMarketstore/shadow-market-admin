@@ -2,59 +2,64 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>DEBUG ADMIN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow Market - Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #000; color: #0ff; font-family: monospace; padding: 20px; }
-        .log { border: 1px solid #0ff; padding: 10px; margin-top: 10px; }
+        body { background: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 20px; }
+        .stats { display: flex; gap: 10px; margin-bottom: 20px; }
+        .stat-card { border: 1px solid #0ff; padding: 15px; border-radius: 8px; flex: 1; text-align: center; }
+        .order-card { border: 1px solid #333; padding: 15px; margin-bottom: 10px; border-radius: 8px; background: #111; position: relative; }
+        .delete-btn { position: absolute; top: 10px; right: 10px; color: #ff4444; cursor: pointer; font-size: 18px; }
+        .status-pill { padding: 4px 8px; border-radius: 4px; font-size: 12px; background: #222; }
     </style>
 </head>
 <body>
-    <h1>CONSOLE DE DIAGNOSTIC</h1>
-    <div id="debug-zone" class="log">Initialisation...</div>
+
+    <nav>
+        <a href="index.html" style="color:#0ff; text-decoration:none;">🏠 Retour Accueil</a>
+    </nav>
+
+    <h1>Admin Dashboard</h1>
+    
+    <div class="stats">
+        <div class="stat-card">Total: <span id="total">0</span></div>
+        <div class="stat-card">En attente: <span id="pending">0</span></div>
+    </div>
+
+    <div id="order-list">Chargement...</div>
 
     <script>
-        const debugZone = document.getElementById('debug-zone');
-        const log = (msg) => debugZone.innerHTML += `<br>> ${msg}`;
+        const supabase = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', 'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX');
 
-        // Sécurité : on attend que l'objet supabase soit réellement disponible
-        function checkSupabase() {
-            if (typeof supabase === 'undefined') {
-                log("Attente du chargement de la librairie...");
-                setTimeout(checkSupabase, 500); // Réessaie toutes les 500ms
-                return;
-            }
-            
-            // Si on arrive ici, c'est que supabase est chargé
-            log("Librairie chargée.");
-            initApp();
+        async function fetchOrders() {
+            const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+            if (error) return alert("Erreur : " + error.message);
+
+            document.getElementById('total').innerText = data.length;
+            document.getElementById('pending').innerText = data.filter(o => o.status === 'en attente').length;
+
+            document.getElementById('order-list').innerHTML = data.map(o => `
+                <div class="order-card">
+                    <i class="fas fa-trash delete-btn" onclick="deleteOrder('${o.id}')"></i>
+                    <strong>${o.customer_email}</strong><br>
+                    <small>${o.modele} | ${o.ram}Go RAM</small>
+                    <p>${o.message || 'Pas de message'}</p>
+                    <span class="status-pill">${o.status}</span>
+                </div>
+            `).join('');
         }
 
-        async function initApp() {
-            try {
-                const client = supabase.createClient(
-                    'https://jsuvimxjmjiljntmgbzu.supabase.co', 
-                    'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
-                );
-                log("Client initialisé.");
-
-                log("Lecture de 'orders'...");
-                const { data, error } = await client.from('orders').select('*');
-                
-                if (error) {
-                    log("ERREUR SUPABASE: " + error.message);
-                } else {
-                    log("Succès ! Nombre de commandes : " + data.length);
-                    // Si on a des données, on les affiche pour prouver que ça marche
-                    if(data.length > 0) log("Dernière commande : " + data[0].customer_email);
-                }
-            } catch (e) {
-                log("ERREUR FATALE: " + e.message);
+        async function deleteOrder(id) {
+            if(confirm("Supprimer cette commande définitivement ?")) {
+                const { error } = await supabase.from('orders').delete().eq('id', id);
+                if (error) alert("Erreur : " + error.message);
+                else fetchOrders();
             }
         }
 
-        // Lancement
-        checkSupabase();
+        fetchOrders();
     </script>
 </body>
 </html>
