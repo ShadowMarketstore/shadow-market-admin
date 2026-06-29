@@ -3,84 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shadow Market - Commandes</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Diagnostic Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; padding: 20px; }
-        h1 { color: #0ff; font-size: 20px; border-bottom: 1px solid #0ff; padding-bottom: 10px; }
-        
-        .stats-row { display: flex; gap: 10px; margin-bottom: 20px; }
-        .stat-box { background: #1a1a1a; padding: 10px; border: 1px solid #0ff; border-radius: 8px; flex: 1; text-align: center; }
-        .stat-val { font-size: 18px; color: #0ff; font-weight: bold; }
-        .stat-label { font-size: 10px; color: #aaa; text-transform: uppercase; }
-
-        .order-card { border: 1px solid #0ff; padding: 15px; margin-bottom: 15px; border-radius: 10px; background: #0a0a0a; position: relative; }
-        .star-btn { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; color: #444; }
-        .star-btn.active { color: #ffd700; }
-        .empty-msg { text-align: center; color: #666; margin-top: 20px; }
+        .debug-box { background: #222; border: 1px solid #ff0000; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 12px; }
+        .success { border-color: #00ff00; }
     </style>
 </head>
 <body>
 
-    <h1>Gestion des Commandes</h1>
-    
-    <div class="stats-row">
-        <div class="stat-box"><div class="stat-label">Reçues</div><div id="count-total" class="stat-val">0</div></div>
-        <div class="stat-box"><div class="stat-label">Terminées</div><div id="count-done" class="stat-val">0</div></div>
-    </div>
-
-    <div id="admin-list">Chargement des commandes...</div>
+    <h1>Diagnostic Admin</h1>
+    <div id="debug-log" class="debug-box">Initialisation du diagnostic...</div>
 
     <script>
+        const log = (msg, isError = false) => {
+            const el = document.getElementById('debug-log');
+            el.innerHTML += `<br>${isError ? '🔴' : '✅'} ${msg}`;
+            console.log(msg);
+        };
+
         const supabase = supabase.createClient(
             'https://jsuvimxjmjiljntmgbzu.supabase.co', 
             'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
         );
 
-        async function loadOrders() {
-            const list = document.getElementById('admin-list');
+        async function runDiagnostic() {
             try {
-                // On récupère toutes les commandes
-                const { data, error } = await supabase
-                    .from('orders')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
+                log("Tentative de connexion à Supabase...");
+                
+                // Test de lecture
+                const { data, error } = await supabase.from('orders').select('*');
+                
                 if (error) throw error;
 
-                if (!data || data.length === 0) {
-                    list.innerHTML = '<div class="empty-msg">Aucune commande pour le moment.</div>';
-                    return;
+                log("Connexion réussie !");
+                log("Nombre de commandes trouvées : " + (data ? data.length : 0));
+                
+                if (data && data.length > 0) {
+                    log("Dernière commande : " + JSON.stringify(data[0]).substring(0, 50) + "...");
+                } else {
+                    log("Aucune donnée dans la table 'orders'. Vérifie si le formulaire envoie bien ici.", true);
                 }
 
-                // Mise à jour des stats
-                document.getElementById('count-total').innerText = data.length;
-                document.getElementById('count-done').innerText = data.filter(c => c.status === 'terminée').length;
-
-                // Génération des cartes
-                list.innerHTML = data.map(cmd => `
-                    <div class="order-card">
-                        <i class="fas fa-star star-btn ${cmd.status === 'terminée' ? 'active' : ''}" 
-                           onclick="toggleStatus('${cmd.id}', '${cmd.status}')"></i>
-                        <p><strong>Email:</strong> ${cmd.customer_email || 'N/A'}</p>
-                        <p><strong>Modèle:</strong> ${cmd.modele || 'N/A'}</p>
-                        <p><strong>Config:</strong> ${cmd.ram || '0'}Go | ${cmd.stockage || 'N/A'}</p>
-                        <p><strong>Message:</strong> ${cmd.message || 'Aucun'}</p>
-                    </div>
-                `).join('');
             } catch (err) {
-                list.innerHTML = `<div class="empty-msg">Erreur : ${err.message}</div>`;
+                log("ERREUR CRITIQUE : " + err.message, true);
             }
         }
 
-        async function toggleStatus(id, currentStatus) {
-            const newStatus = (currentStatus === 'terminée') ? 'en attente' : 'terminée';
-            await supabase.from('orders').update({ status: newStatus }).eq('id', id);
-            loadOrders(); // Recharge pour mettre à jour l'étoile et les stats
-        }
-
-        loadOrders();
+        runDiagnostic();
     </script>
 </body>
 </html>
