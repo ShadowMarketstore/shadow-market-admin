@@ -6,18 +6,19 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; padding: 20px; }
-        h1 { color: #0ff; text-shadow: 0 0 5px #0ff; }
+        h1 { color: #0ff; text-shadow: 0 0 10px #0ff; border-bottom: 1px solid #0ff; padding-bottom: 10px; }
         .order-card { 
-            border: 1px solid #0ff; padding: 15px; margin: 15px 0; 
-            border-radius: 8px; background: #0a0a0a; 
+            border: 1px solid #0ff; padding: 20px; margin-bottom: 15px; 
+            border-radius: 10px; background: #0a0a0a; display: flex; justify-content: space-between; align-items: center;
         }
-        .order-card strong { color: #0ff; }
+        .star { font-size: 24px; cursor: pointer; color: #444; }
+        .star.active { color: #0ff; text-shadow: 0 0 10px #0ff; }
     </style>
 </head>
 <body>
 
     <h1>Commandes reçues</h1>
-    <div id="admin-list">Chargement des commandes en attente...</div>
+    <div id="admin-list">Chargement des commandes...</div>
 
     <script>
         const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
@@ -25,31 +26,27 @@
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         async function loadOrders() {
-            // On récupère toutes les commandes triées par date
-            const { data, error } = await supabase
-                .from('orders')
-                .select('*')
-                .order('created_at', { ascending: false });
-
-            if (error) {
-                document.getElementById('admin-list').innerHTML = "Erreur de chargement.";
-                return;
-            }
-
+            const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
             const list = document.getElementById('admin-list');
-            if (data && data.length > 0) {
-                list.innerHTML = data.map(cmd => `
-                    <div class="order-card">
-                        <p><strong>De :</strong> ${cmd.customer_email}</p>
-                        <p><strong>Config :</strong> ${cmd.modele} | RAM: ${cmd.ram}Go | ${cmd.os}</p>
+            
+            if (!data || data.length === 0) { list.innerHTML = "Aucune commande."; return; }
+
+            list.innerHTML = data.map(cmd => `
+                <div class="order-card">
+                    <div>
+                        <p><strong>Client :</strong> ${cmd.customer_email}</p>
+                        <p><strong>Config :</strong> ${cmd.modele} | ${cmd.ram}Go | ${cmd.os}</p>
                         <p><strong>Message :</strong> ${cmd.message}</p>
-                        <small>Reçu le : ${new Date(cmd.created_at).toLocaleString()}</small>
                     </div>
-                `).join('');
-            } else {
-                list.innerHTML = "Aucune commande pour le moment.";
-            }
+                    <span class="star" onclick="toggleStar(this)">★</span>
+                </div>
+            `).join('');
         }
+
+        function toggleStar(element) {
+            element.classList.toggle('active');
+        }
+
         loadOrders();
     </script>
 </body>
