@@ -2,56 +2,37 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diagnostic Admin</title>
+    <title>Admin Panel</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { background: #000; color: #fff; font-family: sans-serif; padding: 20px; }
-        .debug-box { background: #222; border: 1px solid #ff0000; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 12px; }
-        .success { border-color: #00ff00; }
-    </style>
 </head>
 <body>
-
-    <h1>Diagnostic Admin</h1>
-    <div id="debug-log" class="debug-box">Initialisation du diagnostic...</div>
+    <h1>Diagnostic</h1>
+    <div id="output">Démarrage...</div>
 
     <script>
-        const log = (msg, isError = false) => {
-            const el = document.getElementById('debug-log');
-            el.innerHTML += `<br>${isError ? '🔴' : '✅'} ${msg}`;
-            console.log(msg);
-        };
+        // 1. Vérification que Supabase est chargé
+        if (typeof supabase === 'undefined') {
+            document.getElementById('output').innerHTML = "Erreur : La bibliothèque Supabase n'est pas chargée !";
+        } else {
+            document.getElementById('output').innerHTML = "Bibliothèque chargée. Connexion...";
+            
+            const client = supabase.createClient(
+                'https://jsuvimxjmjiljntmgbzu.supabase.co', 
+                'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
+            );
 
-        const supabase = supabase.createClient(
-            'https://jsuvimxjmjiljntmgbzu.supabase.co', 
-            'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX'
-        );
-
-        async function runDiagnostic() {
-            try {
-                log("Tentative de connexion à Supabase...");
-                
-                // Test de lecture
-                const { data, error } = await supabase.from('orders').select('*');
-                
-                if (error) throw error;
-
-                log("Connexion réussie !");
-                log("Nombre de commandes trouvées : " + (data ? data.length : 0));
-                
-                if (data && data.length > 0) {
-                    log("Dernière commande : " + JSON.stringify(data[0]).substring(0, 50) + "...");
+            // 2. Test immédiat
+            client.from('orders').select('*').then(({ data, error }) => {
+                if (error) {
+                    document.getElementById('output').innerHTML = "Erreur Supabase : " + error.message;
                 } else {
-                    log("Aucune donnée dans la table 'orders'. Vérifie si le formulaire envoie bien ici.", true);
+                    document.getElementById('output').innerHTML = "Succès ! Commandes trouvées : " + data.length;
+                    console.log("Données :", data);
                 }
-
-            } catch (err) {
-                log("ERREUR CRITIQUE : " + err.message, true);
-            }
+            }).catch(e => {
+                document.getElementById('output').innerHTML = "Exception : " + e;
+            });
         }
-
-        runDiagnostic();
     </script>
 </body>
 </html>
