@@ -2,99 +2,59 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shadow Market - Administration</title>
+    <title>Shadow Market - Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --main-color: #0ff; --bg-color: #000; }
-        body { background: var(--bg-color); color: #fff; font-family: 'Segoe UI', sans-serif; padding: 20px; margin: 0; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--main-color); padding-bottom: 10px; margin-bottom: 20px; }
-        .stats-container { display: flex; gap: 20px; margin-bottom: 30px; }
-        .stat-card { border: 1px solid var(--main-color); padding: 20px; border-radius: 12px; flex: 1; text-align: center; }
-        .stat-value { font-size: 28px; font-weight: bold; color: var(--main-color); }
-        .order-list { display: flex; flex-direction: column; gap: 15px; }
-        .order-card { background: #151515; border-left: 4px solid var(--main-color); padding: 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        .order-info strong { color: var(--main-color); font-size: 1.1em; }
-        .order-actions { display: flex; gap: 15px; align-items: center; }
-        .btn-action { cursor: pointer; font-size: 20px; transition: 0.3s; }
-        .btn-action:hover { transform: scale(1.2); }
-        .status-badge { font-size: 12px; padding: 5px 12px; border-radius: 20px; background: #333; text-transform: uppercase; }
+        body { background: #000; color: #fff; font-family: sans-serif; padding: 20px; }
+        .stats { display: flex; gap: 20px; margin-bottom: 20px; }
+        .stat-card { border: 1px solid #0ff; padding: 15px; border-radius: 8px; flex: 1; text-align: center; }
+        .order-card { border: 1px solid #333; padding: 15px; margin-bottom: 10px; border-radius: 8px; background: #111; }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <h1>Dashboard Admin</h1>
-        <a href="index.html" style="color:var(--main-color); text-decoration:none;"><i class="fas fa-home"></i> Retour Accueil</a>
+    <h1>Dashboard Admin</h1>
+    <div class="stats">
+        <div class="stat-card">Total: <span id="total">0</span></div>
+        <div class="stat-card">Traités: <span id="traite">0</span></div>
     </div>
-    
-    <div class="stats-container">
-        <div class="stat-card">Total<br><div id="total" class="stat-value">0</div></div>
-        <div class="stat-card">Traités<br><div id="traite" class="stat-value">0</div></div>
-    </div>
-
-    <div id="order-list" class="order-list">Chargement des données...</div>
+    <div id="debug-log" style="color: yellow; font-size: 12px; margin-bottom: 10px;"></div>
+    <div id="list">Chargement...</div>
 
     <script>
         const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_KEY = 'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const debug = document.getElementById('debug-log');
 
-        async function loadData() {
+        async function init() {
             try {
-                const { data, error } = await supabase
-                    .from('orders')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+                debug.innerText = "Connexion à Supabase...";
+                const { data, error } = await supabase.from('orders').select('*');
                 
-                if (error) throw error;
+                if (error) {
+                    debug.innerText = "ERREUR API: " + error.message;
+                    return;
+                }
 
-                // Mise à jour des compteurs
+                debug.innerText = "Données reçues : " + (data ? data.length : 0) + " commandes.";
+                
+                // Mettre à jour les compteurs
                 document.getElementById('total').innerText = data.length;
                 document.getElementById('traite').innerText = data.filter(o => o.status === 'terminée').length;
 
-                // Construction de la liste
-                const container = document.getElementById('order-list');
-                if (data.length === 0) {
-                    container.innerHTML = "<p>Aucune commande enregistrée pour le moment.</p>";
-                } else {
-                    container.innerHTML = data.map(o => `
-                        <div class="order-card">
-                            <div class="order-info">
-                                <strong>${o.customer_email || 'Email non fourni'}</strong><br>
-                                <small>${o.modele || 'N/A'} | RAM: ${o.ram}Go</small>
-                            </div>
-                            <div class="order-actions">
-                                <span class="status-badge">${o.status}</span>
-                                <i class="fas fa-check-circle btn-action" style="color:green" onclick="updateStatus('${o.id}', 'terminée')"></i>
-                                <i class="fas fa-trash btn-action" style="color:red" onclick="deleteOrder('${o.id}')"></i>
-                            </div>
-                        </div>
-                    `).join('');
-                }
-            } catch (err) {
-                console.error(err);
-                document.getElementById('order-list').innerHTML = `<p style="color:red">Erreur de connexion : ${err.message}</p>`;
+                // Afficher la liste
+                document.getElementById('list').innerHTML = data.map(o => `
+                    <div class="order-card">
+                        <strong>${o.customer_email}</strong><br>
+                        Modèle: ${o.modele} | Statut: ${o.status}
+                    </div>
+                `).join('');
+
+            } catch (e) {
+                debug.innerText = "ERREUR CRITIQUE: " + e.message;
             }
         }
-
-        async function updateStatus(id, newStatus) {
-            const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', id);
-            if (error) alert("Erreur mise à jour : " + error.message);
-            else loadData();
-        }
-
-        async function deleteOrder(id) {
-            if(confirm("Confirmer la suppression définitive de cette commande ?")) {
-                const { error } = await supabase.from('orders').delete().eq('id', id);
-                if (error) alert("Erreur suppression : " + error.message);
-                else loadData();
-            }
-        }
-
-        // Chargement initial
-        loadData();
+        init();
     </script>
 </body>
 </html>
