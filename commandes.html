@@ -2,77 +2,48 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Shadow Market - Commandes</title>
+    <title>Shadow Market - Admin</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; padding: 20px; }
-        h1, h2 { color: #0ff; text-shadow: 0 0 5px #0ff; }
-        input, select, textarea { 
-            width: 100%; padding: 12px; margin: 8px 0; background: #111; 
-            border: 1px solid #0ff; color: #fff; border-radius: 4px; box-sizing: border-box;
+        h1 { color: #0ff; text-shadow: 0 0 5px #0ff; }
+        .order-card { 
+            border: 1px solid #0ff; padding: 15px; margin: 15px 0; 
+            border-radius: 8px; background: #0a0a0a; 
         }
-        button { 
-            background: #0ff; color: #000; border: none; padding: 12px; 
-            width: 100%; cursor: pointer; font-weight: bold; border-radius: 4px;
-        }
-        .order-card { border: 1px solid #0ff; padding: 15px; margin: 15px 0; border-radius: 5px; background: #0a0a0a; }
+        .order-card strong { color: #0ff; }
     </style>
 </head>
 <body>
 
-    <h1>Gestion des Commandes</h1>
-
-    <div id="client-section">
-        <h3>Nouvelle demande sur mesure</h3>
-        <input type="text" id="modele" placeholder="Marque & Modèle">
-        <input type="text" id="ram" placeholder="RAM (Go)">
-        <input type="text" id="stockage" placeholder="Stockage">
-        <select id="os"><option>Windows 10</option><option>Windows 11</option><option>Linux</option></select>
-        <input type="text" id="gpu" placeholder="Carte Graphique">
-        <textarea id="message" placeholder="Détails/Optimisations..."></textarea>
-        <button onclick="submitOrder()">ENVOYER LA COMMANDE</button>
-    </div>
-
-    <hr style="border: 0; border-top: 1px solid #333; margin: 40px 0;">
-
-    <div id="admin-section">
-        <h2>Commandes reçues</h2>
-        <div id="admin-list">Chargement des commandes...</div>
-    </div>
+    <h1>Commandes reçues</h1>
+    <div id="admin-list">Chargement des commandes en attente...</div>
 
     <script>
         const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        async function submitOrder() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) { alert("Connecte-toi d'abord pour commander !"); return; }
-
-            const order = {
-                customer_email: user.email,
-                modele: document.getElementById('modele').value,
-                ram: document.getElementById('ram').value,
-                stockage: document.getElementById('stockage').value,
-                os: document.getElementById('os').value,
-                gpu: document.getElementById('gpu').value,
-                message: document.getElementById('message').value
-            };
-
-            const { error } = await supabase.from('orders').insert([order]);
-            if (error) alert("Erreur : " + error.message);
-            else { alert("Commande reçue !"); location.reload(); }
-        }
-
         async function loadOrders() {
-            const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+            // On récupère toutes les commandes triées par date
+            const { data, error } = await supabase
+                .from('orders')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                document.getElementById('admin-list').innerHTML = "Erreur de chargement.";
+                return;
+            }
+
             const list = document.getElementById('admin-list');
             if (data && data.length > 0) {
                 list.innerHTML = data.map(cmd => `
                     <div class="order-card">
-                        <p><strong>Client :</strong> ${cmd.customer_email}</p>
+                        <p><strong>De :</strong> ${cmd.customer_email}</p>
                         <p><strong>Config :</strong> ${cmd.modele} | RAM: ${cmd.ram}Go | ${cmd.os}</p>
-                        <p><strong>Besoin :</strong> ${cmd.message}</p>
+                        <p><strong>Message :</strong> ${cmd.message}</p>
+                        <small>Reçu le : ${new Date(cmd.created_at).toLocaleString()}</small>
                     </div>
                 `).join('');
             } else {
@@ -83,4 +54,3 @@
     </script>
 </body>
 </html>
-
