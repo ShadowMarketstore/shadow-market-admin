@@ -18,26 +18,18 @@
     <div id="debug-log"></div>
 
     <script>
-        // 1. Définition des constantes
+        // Configuration intégrée avec ta clé
         const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZimxjbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4';
+        const SUPABASE_ANON_KEY = 'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX';
         
         const debug = document.getElementById('debug-log');
         function log(msg) { debug.innerHTML += `<div>> ${msg}</div>`; }
 
         async function init() {
             try {
-                // 2. Vérification que supabase est chargé
-                if (typeof supabase === 'undefined' || !supabase.createClient) {
-                    throw new Error("La bibliothèque Supabase n'est pas chargée.");
-                }
-                log("Supabase chargé.");
-
-                // 3. Initialisation du client
+                log("Initialisation...");
                 const sbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                log("Client initialisé.");
-
-                // 4. Récupération des données
+                
                 log("Récupération des données...");
                 const { data, error } = await sbClient
                     .from('products')
@@ -55,7 +47,7 @@
                     </div>
                 `).join('');
                 
-                debug.style.display = 'none';
+                debug.style.display = 'none'; // Cache le log si tout fonctionne
 
             } catch (err) {
                 log("ERREUR : " + err.message);
@@ -63,7 +55,6 @@
             }
         }
 
-        // 5. Lancement
         window.addEventListener('load', init);
     </script>
 </body>
