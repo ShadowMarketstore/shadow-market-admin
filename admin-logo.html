@@ -3,68 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestion du Logo - Shadow Market</title>
+    <title>Admin Logo</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #0a0a0a; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .preview-box { width: 250px; height: 250px; border: 2px dashed #00ffff; margin: 20px 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .preview-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        #status { color: #00ffff; font-weight: bold; margin: 10px; min-height: 20px; }
-        button { background: #00ffff; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; color: black; border-radius: 5px; }
-        button:disabled { background: #555; }
+        body { background: #0a0a0a; color: #fff; padding: 20px; text-align: center; font-family: sans-serif; }
+        .box { width: 250px; height: 250px; border: 2px dashed #00ffff; margin: 20px auto; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .box img { max-width: 100%; max-height: 100%; }
+        #log { margin: 20px 0; color: #00ffff; font-weight: bold; }
+        button { background: #00ffff; padding: 15px 30px; border: none; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1>Gestion du Logo</h1>
-    
-    <div class="preview-box" id="previewContainer"><span>Aperçu</span></div>
-    
-    <input type="file" id="logoInput" accept="image/*">
-    <div id="status"></div>
-    <button id="applyBtn">APPLIQUER</button>
+    <h1>Gestion Logo</h1>
+    <div class="box" id="p">Aperçu</div>
+    <input type="file" id="f" accept="image/*">
+    <div id="log">En attente...</div>
+    <button id="b">APPLIQUER</button>
 
     <script>
-        const supabase = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', 'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX');
-        const input = document.getElementById('logoInput');
-        const preview = document.getElementById('previewContainer');
-        const btn = document.getElementById('applyBtn');
-        const status = document.getElementById('status');
+        // Initialisation forcée
+        const sb = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', 'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX');
+        
+        const fileInput = document.getElementById('f');
+        const preview = document.getElementById('p');
+        const log = document.getElementById('log');
+        const btn = document.getElementById('b');
 
-        // 1. APERÇU IMMÉDIAT
-        input.onchange = (e) => {
+        // Prévisualisation forcée
+        fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    preview.innerHTML = `<img src="${event.target.result}">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        };
-
-        // 2. ENVOI AVEC ANIMATION
-        btn.onclick = async () => {
-            const file = input.files[0];
-            if (!file) return alert('Sélectionne une image d\'abord !');
+            if (!file) return;
             
-            // Lancer l'animation
-            btn.disabled = true;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                preview.innerHTML = '<img src="' + event.target.result + '">';
+                log.innerText = "Image chargée en mémoire.";
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Upload forcé
+        btn.onclick = async function() {
+            const file = fileInput.files[0];
+            if (!file) { log.innerText = "Erreur : Pas d'image !"; return; }
+            
             btn.innerText = "CHARGEMENT...";
-            status.innerText = "⏳ En cours d'application...";
+            log.innerText = "Envoi vers Supabase en cours...";
 
             try {
-                const { error } = await supabase.storage
+                const { error } = await sb.storage
                     .from('logos')
                     .upload('site-logo.png', file, { upsert: true });
 
                 if (error) throw error;
-                
-                status.innerText = "✅ Succès : Modifications appliquées !";
-                setTimeout(() => { status.innerText = ""; }, 3000);
+                log.innerText = "SUCCÈS : Image mise à jour !";
+                btn.innerText = "APPLIQUER";
             } catch (err) {
-                status.innerText = "❌ Erreur : " + err.message;
-            } finally {
-                btn.disabled = false;
+                log.innerText = "ERREUR : " + err.message;
                 btn.innerText = "APPLIQUER";
             }
         };
