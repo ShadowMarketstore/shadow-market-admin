@@ -2,37 +2,65 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Admin - Shadow Market</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Gestion Logo</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    body { background: #000; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 40px; }
-    .admin-card { border: 2px solid #00ffff; padding: 30px; border-radius: 15px; width: 300px; text-align: center; }
-    .camera-icon { font-size: 50px; margin-bottom: 20px; display: block; }
-    input { width: 90%; padding: 12px; margin: 15px 0; border-radius: 5px; border: 1px solid #00ffff; background: #111; color: #fff; }
-    button { padding: 12px 25px; background: #ff0033; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    body { background: #0a0a0a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .card { border: 2px solid #00ffff; padding: 30px; border-radius: 15px; width: 320px; text-align: center; background: #111; }
+    .camera-icon { font-size: 50px; color: #00ffff; margin-bottom: 20px; display: block; }
+    input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 5px; border: 1px solid #00ffff; background: #000; color: #fff; box-sizing: border-box; }
+    button { padding: 12px 25px; background: #ff0033; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
+    button:hover { background: #cc0029; }
+    #status { margin-top: 15px; font-size: 0.9em; min-height: 1.2em; }
+    .back-link { display: block; margin-top: 20px; color: #b0b0b0; text-decoration: none; font-size: 0.9em; }
+    .back-link:hover { color: #00ffff; }
   </style>
 </head>
 <body>
-  <div class="admin-card">
-    <span class="camera-icon">📷</span>
-    <h2>Changer le Logo</h2>
-    <input type="text" id="logoUrl" placeholder="Lien de la nouvelle image">
+
+  <div class="card">
+    <i class="fas fa-camera camera-icon"></i>
+    <h2>Logo Boutique</h2>
+    <input type="text" id="logoUrl" placeholder="Collez l'URL de l'image ici">
     <button onclick="saveLogo()">METTRE À JOUR</button>
     <p id="status"></p>
+    <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Retour au Tableau de bord</a>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabaseClient = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', 'VOTRE_SERVICE_ROLE_KEY');
+    // Initialisation Supabase
+    const supabase = supabase.createClient(
+        'https://jsuvimxjmjiljntmgbzu.supabase.co', 
+        'VOTRE_SERVICE_ROLE_KEY' // Remplace bien par ta clé secrète pour permettre l'écriture
+    );
 
     async function saveLogo() {
       const url = document.getElementById('logoUrl').value;
-      if (!url) return alert("Veuillez entrer un lien");
+      const statusText = document.getElementById('status');
       
-      const { error } = await supabaseClient
-        .from('settings')
-        .upsert({ key: 'header_logo', value: url }, { onConflict: 'key' });
+      if (!url) {
+        statusText.innerText = "Le champ est vide !";
+        statusText.style.color = "red";
+        return;
+      }
+      
+      statusText.innerText = "Enregistrement en cours...";
+      
+      try {
+        const { error } = await supabase
+          .from('settings')
+          .upsert({ key: 'header_logo', value: url }, { onConflict: 'key' });
 
-      document.getElementById('status').innerText = error ? "Erreur : " + error.message : "Logo mis à jour !";
+        if (error) throw error;
+        
+        statusText.innerText = "Logo mis à jour avec succès !";
+        statusText.style.color = "#00ffff";
+      } catch (err) {
+        statusText.innerText = "Erreur : " + err.message;
+        statusText.style.color = "red";
+      }
     }
   </script>
 </body>
