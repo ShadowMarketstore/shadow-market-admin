@@ -9,12 +9,8 @@
     body { background: #0a0a0a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
     .card { border: 2px solid #00ffff; padding: 30px; border-radius: 15px; width: 320px; text-align: center; background: #111; }
     .camera-icon { font-size: 50px; color: #00ffff; margin-bottom: 20px; display: block; }
-    input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 5px; border: 1px solid #00ffff; background: #000; color: #fff; box-sizing: border-box; }
-    button { padding: 12px 25px; background: #ff0033; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
-    button:hover { background: #cc0029; }
-    #status { margin-top: 15px; font-size: 0.9em; min-height: 1.2em; }
+    button { padding: 15px; background: #ff0033; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
     .back-link { display: block; margin-top: 20px; color: #b0b0b0; text-decoration: none; font-size: 0.9em; }
-    .back-link:hover { color: #00ffff; }
   </style>
 </head>
 <body>
@@ -22,44 +18,35 @@
   <div class="card">
     <i class="fas fa-camera camera-icon"></i>
     <h2>Logo Boutique</h2>
-    <input type="text" id="logoUrl" placeholder="Collez l'URL de l'image ici">
-    <button onclick="saveLogo()">METTRE À JOUR</button>
+    
+    <!-- Input invisible pour déclencher le sélecteur d'image natif -->
+    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="uploadLogo(event)">
+    <button onclick="document.getElementById('fileInput').click()">SÉLECTIONNER UNE IMAGE</button>
+    
     <p id="status"></p>
     <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Retour au Tableau de bord</a>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    // Initialisation Supabase
-    const supabase = supabase.createClient(
-        'https://jsuvimxjmjiljntmgbzu.supabase.co', 
-        'VOTRE_SERVICE_ROLE_KEY' // Remplace bien par ta clé secrète pour permettre l'écriture
-    );
+    const supabase = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', 'VOTRE_SERVICE_ROLE_KEY');
 
-    async function saveLogo() {
-      const url = document.getElementById('logoUrl').value;
+    async function uploadLogo(event) {
+      const file = event.target.files[0];
       const statusText = document.getElementById('status');
-      
-      if (!url) {
-        statusText.innerText = "Le champ est vide !";
-        statusText.style.color = "red";
-        return;
-      }
-      
-      statusText.innerText = "Enregistrement en cours...";
-      
-      try {
-        const { error } = await supabase
-          .from('settings')
-          .upsert({ key: 'header_logo', value: url }, { onConflict: 'key' });
+      if (!file) return;
 
-        if (error) throw error;
-        
+      statusText.innerText = "Upload en cours...";
+      
+      // Envoi vers le bucket "logos" dans Supabase Storage
+      const { data, error } = await supabase.storage.from('logos').upload('current_logo.png', file, { upsert: true });
+
+      if (error) {
+        statusText.innerText = "Erreur : " + error.message;
+      } else {
+        const { data: publicUrl } = supabase.storage.from('logos').getPublicUrl('current_logo.png');
+        await supabase.from('settings').upsert({ key: 'header_logo', value: publicUrl.publicUrl }, { onConflict: 'key' });
         statusText.innerText = "Logo mis à jour avec succès !";
-        statusText.style.color = "#00ffff";
-      } catch (err) {
-        statusText.innerText = "Erreur : " + err.message;
-        statusText.style.color = "red";
       }
     }
   </script>
