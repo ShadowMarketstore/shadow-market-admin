@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Shadow Market</title>
+  <style>
+    body { background: #000; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 40px; }
+    .admin-card { border: 2px solid #00ffff; padding: 30px; border-radius: 15px; width: 300px; text-align: center; }
+    .camera-icon { font-size: 50px; margin-bottom: 20px; display: block; }
+    input { width: 90%; padding: 12px; margin: 15px 0; border-radius: 5px; border: 1px solid #00ffff; background: #111; color: #fff; }
+    button { padding: 12px 25px; background: #ff0033; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="admin-card">
+    <span class="camera-icon">📷</span>
+    <h2>Changer le Logo</h2>
+    <input type="text" id="logoUrl" placeholder="Lien de la nouvelle image">
+    <button onclick="saveLogo()">METTRE À JOUR</button>
+    <p id="status"></p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabaseClient = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', 'VOTRE_SERVICE_ROLE_KEY');
+
+    async function saveLogo() {
+      const url = document.getElementById('logoUrl').value;
+      if (!url) return alert("Veuillez entrer un lien");
+      
+      const { error } = await supabaseClient
+        .from('settings')
+        .upsert({ key: 'header_logo', value: url }, { onConflict: 'key' });
+
+      document.getElementById('status').innerText = error ? "Erreur : " + error.message : "Logo mis à jour !";
+    }
+  </script>
+</body>
+</html>
