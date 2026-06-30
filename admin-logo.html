@@ -2,82 +2,51 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Gestion du Logo - Shadow Market</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow Market - Auto Adaptatif</title>
     <style>
-        body { margin: 0; background-color: #0a0a0a; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        h1 { color: #00ffff; margin-top: 50px; }
-        .preview-box { width: 250px; height: 250px; border: 2px dashed #00ffff; margin: 20px 0; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #111; }
-        .preview-box img { max-width: 100%; max-height: 100%; object-fit: contain; }
-        #message { margin: 10px 0; font-weight: bold; min-height: 20px; }
-        button { background-color: #00ffff; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; color: black; border-radius: 5px; font-size: 16px; transition: 0.3s; }
-        button:disabled { background-color: #555; cursor: not-allowed; }
-        .spinner { margin-right: 10px; display: none; }
+        /* Base mobile-first */
+        body { 
+            margin: 0; background-color: #0a0a0a; color: white; 
+            font-family: sans-serif; display: flex; flex-direction: column; 
+            align-items: center; padding: 15px; 
+        }
+
+        /* Le conteneur s'adapte à la largeur disponible */
+        .container { 
+            width: 100%; max-width: 500px; display: flex; 
+            flex-direction: column; align-items: center; 
+        }
+
+        .preview-box { 
+            width: 100%; /* S'adapte à l'écran */
+            aspect-ratio: 1 / 1; /* Reste un carré parfait */
+            border: 2px dashed #00ffff; margin: 20px 0; 
+            display: flex; align-items: center; justify-content: center; 
+            overflow: hidden; background: #111; 
+        }
+        
+        .preview-box img { max-width: 90%; max-height: 90%; object-fit: contain; }
+
+        button { 
+            width: 100%; /* Bouton pleine largeur sur mobile */
+            padding: 15px; background: #00ffff; border: none; 
+            border-radius: 5px; font-weight: bold; cursor: pointer; 
+        }
+
+        /* Ajustement si l'écran est large (PC) */
+        @media (min-width: 600px) {
+            button { width: 300px; } /* Le bouton devient fixe sur PC */
+        }
     </style>
 </head>
 <body>
-    <h1>Gestion du Logo</h1>
-    
-    <div class="preview-box" id="previewContainer"><span>Prévisualisation</span></div>
-    
-    <input type="file" id="logoInput" accept="image/*">
-    <div id="message"></div>
-    <button id="applyBtn"><i class="fas fa-spinner fa-spin spinner" id="spinner"></i> <span id="btnText">APPLIQUER LE LOGO</span></button>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const supabase = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', 'sb_publishable_Ngm29impwbTLGhuqyCxSJA_E1jXc1DX');
-        
-        const logoInput = document.getElementById('logoInput');
-        const previewContainer = document.getElementById('previewContainer');
-        const applyBtn = document.getElementById('applyBtn');
-        const spinner = document.getElementById('spinner');
-        const btnText = document.getElementById('btnText');
-        const message = document.getElementById('message');
-
-        // Aperçu de l'image
-        logoInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    previewContainer.innerHTML = `<img src="${event.target.result}">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Envoi vers Supabase
-        applyBtn.onclick = async () => {
-            const file = logoInput.files[0];
-            if (!file) return alert('Sélectionne une image !');
-            
-            // Lancement animation
-            applyBtn.disabled = true;
-            spinner.style.display = 'inline-block';
-            btnText.innerText = "Chargement...";
-            message.style.color = "white";
-            message.innerText = "Envoi en cours, ne quittez pas la page...";
-
-            const { error } = await supabase.storage
-                .from('logos')
-                .upload('site-logo.png', file, { upsert: true });
-
-            // Fin animation
-            applyBtn.disabled = false;
-            spinner.style.display = 'none';
-            btnText.innerText = "APPLIQUER LE LOGO";
-
-            if (error) {
-                message.style.color = "#ff3333";
-                message.innerText = "Erreur : " + error.message;
-            } else {
-                message.style.color = "#00ff00";
-                message.innerText = "Logo mis à jour avec succès !";
-                // Attendre 2s pour laisser voir le succès
-                setTimeout(() => { message.innerText = ""; }, 3000);
-            }
-        };
-    </script>
-</body>
+    <div class="container">
+        <h1>Gestion du Logo</h1>
+        <div class="preview-box" id="previewContainer"><span>Aperçu</span></div>
+        <input type="file" id="logoInput" accept="image/*">
+        <div id="statusMessage"></div>
+        <button id="applyBtn">APPLIQUER</button>
+    </div>
+    </body>
 </html>
