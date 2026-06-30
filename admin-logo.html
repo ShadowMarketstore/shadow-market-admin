@@ -2,60 +2,62 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Admin - Gestion Logo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion Logo</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    body { background: #0a0a0a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-    .card { border: 2px solid #00ffff; padding: 20px; border-radius: 15px; width: 320px; text-align: center; background: #111; }
-    .camera-icon { font-size: 50px; color: #FFFFFF; margin-bottom: 20px; display: block; }
-    #preview { width: 100%; max-height: 150px; object-fit: contain; margin: 15px 0; border: 1px solid #444; display: none; }
+    body { background: #0a0a0a; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 10px; }
+    .card { border: 2px solid #00ffff; padding: 20px; border-radius: 15px; width: 100%; max-width: 350px; text-align: center; background: #111; }
+    /* Espace de prévisualisation adaptatif */
+    #preview { width: 100%; max-height: 200px; object-fit: contain; margin: 15px 0; border: 1px dashed #00ffff; display: none; }
     button { padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
-    .btn-select { background: #ff0033; color: white; }
-    .btn-apply { background: #00ffff; color: #000; display: none; }
-    .back-link { display: block; margin-top: 20px; color: #b0b0b0; text-decoration: none; font-size: 0.8em; }
+    .btn-select { background: #333; color: white; border: 1px solid #fff; }
+    .btn-apply { background: #00ffff; color: #000; display: none; } /* Caché par défaut */
   </style>
 </head>
 <body>
   <div class="card">
-    <i class="fas fa-camera camera-icon"></i>
     <h2>Logo Boutique</h2>
     <img id="preview" src="#" alt="Aperçu">
-    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="previewImage(event)">
+    
+    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handlePreview(event)">
     <button class="btn-select" onclick="document.getElementById('fileInput').click()">SÉLECTIONNER UNE IMAGE</button>
+    
     <button id="applyBtn" class="btn-apply" onclick="uploadLogo()">APPLIQUER LES MODIFICATIONS</button>
     <p id="status"></p>
-    <a href="index.html" class="back-link">← Retour au Tableau de bord</a>
+    <a href="index.html" style="color: #888; text-decoration: none; font-size: 0.8em;">Retour</a>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const supabase = supabase.createClient('https://jsuvimxjmjiljntmgbzu.supabase.co', 'VOTRE_SERVICE_ROLE_KEY');
-    let selectedFile = null;
+    const supabase = supabase.createClient('URL', 'KEY');
+    let fileToUpload = null;
 
-    function previewImage(event) {
-      selectedFile = event.target.files[0];
-      if (selectedFile) {
+    function handlePreview(event) {
+      fileToUpload = event.target.files[0];
+      if (fileToUpload) {
         const reader = new FileReader();
         reader.onload = (e) => {
           const img = document.getElementById('preview');
           img.src = e.target.result;
           img.style.display = 'block';
-          document.getElementById('applyBtn').style.display = 'block';
+          document.getElementById('applyBtn').style.display = 'block'; // Affiche le bouton Appliquer
         };
-        reader.readAsDataURL(selectedFile);
+        reader.readAsDataURL(fileToUpload);
       }
     }
 
     async function uploadLogo() {
-      if (!selectedFile) return;
-      document.getElementById('status').innerText = "Envoi en cours...";
-      const { error } = await supabase.storage.from('logos').upload('current_logo.png', selectedFile, { upsert: true });
-      if (error) {
-        document.getElementById('status').innerText = "Erreur : " + error.message;
+      if (!fileToUpload) return;
+      document.getElementById('status').innerText = "Application en cours...";
+      
+      const { error } = await supabase.storage.from('logos').upload('logo.png', fileToUpload, { upsert: true });
+      if (!error) {
+        const { data } = supabase.storage.from('logos').getPublicUrl('logo.png');
+        await supabase.from('settings').upsert({ key: 'header_logo', value: data.publicUrl }, { onConflict: 'key' });
+        document.getElementById('status').innerText = "Modifications appliquées !";
       } else {
-        const { data: publicUrl } = supabase.storage.from('logos').getPublicUrl('current_logo.png');
-        await supabase.from('settings').upsert({ key: 'header_logo', value: publicUrl.publicUrl }, { onConflict: 'key' });
-        document.getElementById('status').innerText = "Logo appliqué avec succès !";
+        document.getElementById('status').innerText = "Erreur : " + error.message;
       }
     }
   </script>
