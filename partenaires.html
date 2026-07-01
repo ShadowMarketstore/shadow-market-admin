@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { background: #050505; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
-        h1, h2 { color: #00ffff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px #00ffff; }
+        h1, h2 { color: #00ffff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px #00ffff; margin-top: 30px; }
         
         .admin-container { max-width: 800px; margin: 0 auto; }
         
@@ -16,8 +16,11 @@
         .form-group { display: flex; flex-direction: column; margin-bottom: 15px; }
         
         label { font-size: 14px; margin-bottom: 5px; color: #b0b0b0; font-weight: bold; }
-        input, select { background: #222; border: 1px solid #333; padding: 10px; border-radius: 5px; color: white; font-size: 16px; outline: none; box-sizing: border-box; }
+        input, select { background: #222; border: 1px solid #333; padding: 10px; border-radius: 5px; color: white; font-size: 16px; outline: none; width: 100%; box-sizing: border-box; }
         input:focus, select:focus { border-color: #00ffff; }
+        
+        .form-row-flex { display: flex; gap: 10px; width: 100%; box-sizing: border-box; }
+        .form-row-flex input { flex: 1; min-width: 0; }
         
         .btn-submit { background: #00ffff; color: black; border: none; padding: 12px 20px; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; width: 100%; margin-top: 10px; }
         .btn-submit:hover { background: #00cccc; box-shadow: 0 0 10px #00ffff; }
@@ -25,17 +28,19 @@
         .btn-action { background: #00ffff; color: black; border: none; padding: 0 15px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap; }
         .btn-action:hover { background: #00cccc; box-shadow: 0 0 8px #00ffff; }
 
-        /* Tableau des partenaires */
-        .table-container { background: #111; border: 1px solid #333; border-radius: 10px; overflow: hidden; margin-top: 20px; }
+        /* Tableaux */
+        .table-container { background: #111; border: 1px solid #333; border-radius: 10px; overflow: hidden; margin-top: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: #00ffff; color: black; padding: 15px; font-weight: bold; text-transform: uppercase; font-size: 14px; }
-        td { padding: 15px; border-bottom: 1px solid #222; }
+        th { background: #00ffff; color: black; padding: 15px; font-weight: bold; text-transform: uppercase; font-size: 13px; }
+        td { padding: 15px; border-bottom: 1px solid #222; font-size: 15px; }
         tr:hover { background: #161616; }
         
         .creator-icon { font-size: 20px; margin-right: 8px; vertical-align: middle; }
         .badge-code { background: #222; border: 1px solid #00ffff; padding: 4px 8px; border-radius: 4px; color: #00ffff; font-family: monospace; font-weight: bold; }
         .btn-delete { background: #ff3333; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-delete:hover { background: #cc0000; }
+        
+        .text-gain { color: #00ff00; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -66,8 +71,8 @@
             
             <div class="form-group">
                 <label for="c-code">Code Créateur</label>
-                <div style="display: flex; gap: 10px; width: 100%;">
-                    <input type="text" id="c-code" placeholder="Ex: ALEX10" style="flex: 1; min-width: 0;">
+                <div class="form-row-flex">
+                    <input type="text" id="c-code" placeholder="Ex: ALEX10">
                     <button type="button" class="btn-action" onclick="genererCodeAleatoire()">Générer</button>
                 </div>
             </div>
@@ -77,10 +82,28 @@
                 <input type="number" id="c-rate" placeholder="Ex: 10" min="0" max="100">
             </div>
             
-            <button class="btn-submit" onclick="creerPartenaire()">Enregistrer le Partenaire</button>
+            <button type="button" class="btn-submit" onclick="creerPartenaire()">Enregistrer le Partenaire</button>
         </div>
         
-        <!-- Tableau d'affichage -->
+        <!-- Espace Performances -->
+        <h2>Performances des Codes</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Utilisations</th>
+                        <th>Total Commandes</th>
+                        <th>Gains Estimés</th>
+                    </tr>
+                </thead>
+                <tbody id="performance-list">
+                    <!-- Calculé dynamiquement -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Liste de gestion -->
         <h2>Partenaires Actuels</h2>
         <div class="table-container">
             <table>
@@ -88,12 +111,12 @@
                     <tr>
                         <th>Partenaire</th>
                         <th>Code</th>
-                        <th>Com. / Remise</th>
+                        <th>Remise</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="creators-list">
-                    <!-- Généré dynamiquement par JS -->
+                    <!-- Liste de gestion -->
                 </tbody>
             </table>
         </div>
@@ -105,7 +128,6 @@
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // 1. Générer un code créateur de manière aléatoire
         function genererCodeAleatoire() {
             const prefixe = "SHADOW";
             const caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -116,64 +138,76 @@
             document.getElementById('c-code').value = prefixe + suffixe;
         }
 
-        // 2. Charger et afficher la liste des partenaires existants
-        async function chargerPartenaires() {
-            const tbody = document.getElementById('creators-list');
-            if (!tbody) return;
+        async function chargerDonnees() {
+            const tbodyCreators = document.getElementById('creators-list');
+            const tbodyPerf = document.getElementById('performance-list');
             
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #aaa;">Chargement...</td></tr>';
+            tbodyCreators.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #aaa;">Chargement...</td></tr>';
+            tbodyPerf.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #aaa;">Calcul des stats...</td></tr>';
             
             try {
-                const { data, error } = await supabase.from('creators').select('*').order('created_at', { ascending: false });
+                // Récupère les créateurs et les commandes
+                const { data: creators, error: errC } = await supabase.from('creators').select('*').order('created_at', { ascending: false });
+                const { data: orders, error: errO } = await supabase.from('orders').select('*');
                 
-                if (error) throw error;
+                if (errC) throw errC;
                 
-                tbody.innerHTML = '';
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #666;">Aucun partenaire enregistré</td></tr>';
+                tbodyCreators.innerHTML = '';
+                tbodyPerf.innerHTML = '';
+                
+                if (!creators || creators.length === 0) {
+                    tbodyCreators.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #666;">Aucun partenaire</td></tr>';
+                    tbodyPerf.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #666;">Aucune statistique</td></tr>';
                     return;
                 }
                 
-                data.forEach(row => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td><span class="creator-icon">${row.icon || '👤'}</span>${row.name}</td>
-                        <td><span class="badge-code">${row.code}</span></td>
-                        <td>${(row.commission_rate * 100).toFixed(0)}%</td>
-                        <td><button class="btn-delete" onclick="supprimerPartenaire('${row.id}')">Supprimer</button></td>
+                creators.forEach(creator => {
+                    // Filtre les commandes qui possèdent ce code créateur
+                    const matchingOrders = (orders || []).filter(o => o.creator_code && o.creator_code.toUpperCase() === creator.code.toUpperCase());
+                    
+                    const count = matchingOrders.length;
+                    const totalSales = matchingOrders.reduce((sum, o) => sum + (parseFloat(o.price) || 0), 0);
+                    const gains = totalSales * creator.commission_rate;
+                    
+                    // Table de gestion
+                    const trC = document.createElement('tr');
+                    trC.innerHTML = `
+                        <td><span class="creator-icon">${creator.icon || '👤'}</span>${creator.name}</td>
+                        <td><span class="badge-code">${creator.code}</span></td>
+                        <td>${(creator.commission_rate * 100).toFixed(0)}%</td>
+                        <td><button type="button" class="btn-delete" onclick="supprimerPartenaire('${creator.id}')">Supprimer</button></td>
                     `;
-                    tbody.appendChild(tr);
+                    tbodyCreators.appendChild(trC);
+                    
+                    // Table des performances
+                    const trP = document.createElement('tr');
+                    trP.innerHTML = `
+                        <td><span class="badge-code">${creator.code}</span></td>
+                        <td>${count}</td>
+                        <td>${totalSales.toFixed(2)} €</td>
+                        <td class="text-gain">${gains.toFixed(2)} €</td>
+                    `;
+                    tbodyPerf.appendChild(trP);
                 });
+                
             } catch (err) {
                 console.error(err);
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #ff3333;">Erreur de chargement</td></tr>';
+                tbodyCreators.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #ff3333;">Erreur</td></tr>';
             }
         }
 
-        // 3. Envoyer le nouveau partenaire dans la base de données
         async function creerPartenaire() {
             try {
-                const iconInput = document.getElementById('c-icon');
-                const nameInput = document.getElementById('c-name');
-                const codeInput = document.getElementById('c-code');
-                const rateInput = document.getElementById('c-rate');
-
-                if (!iconInput || !nameInput || !codeInput || !rateInput) {
-                    alert("Erreur critique : Un ou plusieurs éléments du formulaire sont introuvables.");
-                    return;
-                }
-
-                const icon = iconInput.value;
-                const name = nameInput.value.trim();
-                const code = codeInput.value.trim().toUpperCase();
-                const rateValue = rateInput.value;
+                const icon = document.getElementById('c-icon').value;
+                const name = document.getElementById('c-name').value.trim();
+                const code = document.getElementById('c-code').value.trim().toUpperCase();
+                const rateValue = document.getElementById('c-rate').value;
 
                 if (!name || !code || !rateValue) {
                     alert("Veuillez remplir tous les champs !");
                     return;
                 }
 
-                // Convertit le pourcentage (ex: 15 devient 0.15)
                 const commission_rate = parseFloat(rateValue) / 100;
 
                 const { error } = await supabase
@@ -184,34 +218,30 @@
 
                 alert("Partenaire ajouté avec succès !");
                 
-                // Reset du formulaire
-                nameInput.value = '';
-                codeInput.value = '';
-                rateInput.value = '';
+                document.getElementById('c-name').value = '';
+                document.getElementById('c-code').value = '';
+                document.getElementById('c-rate').value = '';
                 
-                // Actualise la table
-                chargerPartenaires();
+                chargerDonnees();
 
             } catch (err) {
-                console.error(err);
-                alert("Erreur lors de la création : " + (err.message || err));
+                alert("Erreur : " + (err.message || err));
             }
         }
 
-        // 4. Supprimer un partenaire de la base
         async function supprimerPartenaire(id) {
             if (confirm("Voulez-vous vraiment supprimer ce partenaire ?")) {
                 try {
                     const { error } = await supabase.from('creators').delete().eq('id', id);
                     if (error) throw error;
-                    chargerPartenaires();
+                    chargerDonnees();
                 } catch (err) {
-                    alert("Erreur lors de la suppression : " + err.message);
+                    alert("Erreur : " + err.message);
                 }
             }
         }
 
-        window.onload = chargerPartenaires;
+        window.onload = chargerDonnees;
     </script>
 </body>
 </html>
