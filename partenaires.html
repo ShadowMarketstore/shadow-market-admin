@@ -14,7 +14,7 @@
             --cyan-neon: #00ffcc;
             --text-color: #ffffff;
             --text-muted: #888899;
-            --border-color: #22222b;
+            --border-color: #2b2b36; /* Légèrement plus clair pour bien voir la grille */
         }
 
         * {
@@ -168,17 +168,27 @@
             box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
         }
 
-        /* Tableaux */
+        /* --- CORRECTION DES TABLEAUX (VRAIE GRILLE STYLE DESSIN) --- */
         .table-container {
-            overflow-x: auto;
+            overflow-x: auto; /* Permet de scroller de gauche à droite sur mobile sans écraser le texte */
             margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 13px;
             text-align: left;
+            min-width: 450px; /* Empêche les colonnes de devenir minuscules sur mobile */
+        }
+
+        /* Bordures tout autour de chaque case (Lignes horizontales ET verticales comme ton dessin) */
+        th, td {
+            padding: 12px 10px;
+            border: 1px solid var(--border-color); 
+            white-space: nowrap; /* Empêche le texte de revenir à la ligne brutalement */
         }
 
         th {
@@ -186,14 +196,12 @@
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 10px 12px;
-            border-bottom: 1px solid var(--border-color);
+            background: #16161f;
         }
 
         td {
-            padding: 14px 12px;
-            border-bottom: 1px solid #16161f;
             color: #e2e2e9;
+            background: #0d0d12;
         }
 
         code {
@@ -205,7 +213,7 @@
         }
 
         .action-cell {
-            text-align: right;
+            text-align: center;
         }
 
         .btn-delete {
@@ -277,10 +285,10 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Partenaire</th> <!-- Colonne 1 -->
-                            <th>Code</th>       <!-- Colonne 2 -->
-                            <th>Utilisations</th><!-- Colonne 3 -->
-                            <th>Argent généré</th><!-- Colonne 4 -->
+                            <th>Partenaire</th> 
+                            <th>Code</th>       
+                            <th>Utilisations</th>
+                            <th>Argent généré</th>
                         </tr>
                     </thead>
                     <tbody id="table-performances-body">
@@ -369,13 +377,13 @@
                 creators.forEach(creator => {
                     const displayPercent = creator.commission_rate ? `${Math.round(creator.commission_rate * 100)}%` : '0%';
 
-                    // Remplissage Tableau 1 : Performances des codes (Conforme à ton schéma)
+                    // Remplissage Tableau 1 : Performances des codes
                     const rowPerf = document.createElement('tr');
                     rowPerf.innerHTML = `
-                        <td>${creator.icon || '🔥'} ${creator.name}</td> <!-- 1 = Nom -->
-                        <td><code>${creator.code}</code></td>             <!-- 2 = Code -->
-                        <td>0</td>                                        <!-- 3 = Utilisations -->
-                        <td style="color: var(--cyan-neon); font-weight: bold;">0.00 €</td> <!-- 4 = Argent généré -->
+                        <td>${creator.icon || '🔥'} ${creator.name}</td>
+                        <td><code>${creator.code}</code></td>
+                        <td>0</td>
+                        <td style="color: var(--cyan-neon); font-weight: bold;">0.00 €</td>
                     `;
                     tablePerformances.appendChild(rowPerf);
 
@@ -397,7 +405,7 @@
             }
         }
 
-        // --- FONCTION : AJOUTER UN PARTENAIRE (SOUMISSION FORMULAIRE) ---
+        // --- FONCTION : AJOUTER UN PARTENAIRE ---
         partnerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
