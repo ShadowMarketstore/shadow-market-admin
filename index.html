@@ -39,9 +39,13 @@
         <button onclick="window.location.href='admin-logo.html'" style="color: #FFFFFF !important;">
             <i class="fas fa-camera"></i> Changer le Logo
         </button>
-        <!-- Nouveau bouton Partenaires -->
+        
+        <!-- Navigation Espace Partenaires Séparé -->
         <button onclick="window.location.href='partenaires.html'">
-            <i class="fas fa-handshake"></i> Partenaires
+            <i class="fas fa-chart-line"></i> Performances
+        </button>
+        <button onclick="window.location.href='add-partenaire.html'">
+            <i class="fas fa-user-plus"></i> Ajouter Partenaire
         </button>
     </div>
     <div class="main-content">
@@ -54,7 +58,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4';
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
         async function updateDashboardStats() {
