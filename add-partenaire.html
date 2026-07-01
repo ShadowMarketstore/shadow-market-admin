@@ -8,41 +8,31 @@
     <style>
         body { background: #050505; color: white; font-family: sans-serif; margin: 0; padding: 15px; box-sizing: border-box; }
         h2 { color: #00ffff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px #00ffff; font-size: 24px; margin-top: 10px; margin-bottom: 25px; }
-        
         .admin-container { max-width: 500px; margin: 0 auto; }
-        
         .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .btn-back { color: #aaa; text-decoration: none; font-size: 16px; font-weight: bold; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
         .btn-back:hover { color: #00ffff; }
-
-        /* Style du bloc calqué sur ta capture */
         .form-createur { background: #111; border: 2px solid #00ffff; padding: 25px; border-radius: 10px; box-shadow: 0 0 15px rgba(0, 255, 255, 0.1); box-sizing: border-box; }
         .form-group { display: flex; flex-direction: column; margin-bottom: 20px; }
-        
         label { font-size: 13px; margin-bottom: 10px; color: #b0b0b0; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
         input, select { background: #1e1e1e; border: 1px solid #333; padding: 14px; border-radius: 6px; color: white; font-size: 16px; outline: none; width: 100%; box-sizing: border-box; }
         input:focus, select:focus { border-color: #00ffff; }
-        
         .form-row-flex { display: flex; gap: 10px; width: 100%; box-sizing: border-box; }
         .form-row-flex input { flex: 1; min-width: 0; }
-        
         .btn-submit { background: #00ffff; color: black; border: none; padding: 16px 20px; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; width: 100%; margin-top: 10px; box-shadow: 0 0 12px rgba(0, 255, 255, 0.3); }
         .btn-submit:hover { background: #00cccc; box-shadow: 0 0 18px #00ffff; }
-        
+        .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
         .btn-action { background: #00ffff; color: black; border: none; padding: 0 22px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap; font-size: 14px; }
         .btn-action:hover { background: #00cccc; box-shadow: 0 0 8px #00ffff; }
     </style>
 </head>
 <body>
-
     <div class="admin-container">
         <div class="header-actions">
             <a href="partenaires.html" class="btn-back"><i class="fas fa-arrow-left"></i> Retour</a>
         </div>
-
         <div class="form-createur">
             <h2>Ajouter un Créateur</h2>
-            
             <div class="form-group">
                 <label for="c-icon">Icône de repérage</label>
                 <select id="c-icon">
@@ -54,12 +44,10 @@
                     <option value="🚀">🚀 Fusée</option>
                 </select>
             </div>
-            
             <div class="form-group">
                 <label for="c-name">Nom du Partenaire</label>
                 <input type="text" id="c-name" placeholder="Ex: Alex Gaming">
             </div>
-            
             <div class="form-group">
                 <label for="c-code">Code Créateur</label>
                 <div class="form-row-flex">
@@ -67,13 +55,11 @@
                     <button type="button" class="btn-action" onclick="genererCodeAleatoire()">Générer</button>
                 </div>
             </div>
-            
             <div class="form-group">
                 <label for="c-rate">Commission / Remise (%)</label>
                 <input type="number" id="c-rate" placeholder="Ex: 15" min="0" max="100">
             </div>
-            
-            <button type="button" class="btn-submit" onclick="creerPartenaire()">Enregistrer le Partenaire</button>
+            <button type="button" class="btn-submit" id="submitBtn" onclick="creerPartenaire()">Enregistrer le Partenaire</button>
         </div>
     </div>
 
@@ -81,7 +67,9 @@
     <script>
         const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Initialisation propre avec la variable db
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         function genererCodeAleatoire() {
             const prefixe = "SHADOW";
@@ -94,6 +82,7 @@
         }
 
         async function creerPartenaire() {
+            const btn = document.getElementById('submitBtn');
             try {
                 const icon = document.getElementById('c-icon').value;
                 const name = document.getElementById('c-name').value.trim();
@@ -106,37 +95,33 @@
                 }
 
                 const commission_rate = parseFloat(rateValue) / 100;
-
-                // Envoi hautement sécurisé à la base de données
-                const { data, error } = await supabase
-                    .from('creators')
-                    .insert([
-                        { 
-                            icon: icon, 
-                            name: name, 
-                            code: code, 
-                            commission_rate: commission_rate 
-                        }
-                    ])
-                    .select();
-
-                if (error) {
-                    // Si Supabase renvoie une erreur spécifique (ex: colonne manquante ou doublon)
-                    alert("Erreur Supabase : " + error.message + " \nCode erreur : " + error.code);
+                if (isNaN(commission_rate) || commission_rate < 0 || commission_rate > 1) {
+                    alert("Commission invalide (0-100%)");
                     return;
                 }
 
-                alert("Partenaire " + name + " enregistré avec succès !");
-                
-                // Redirection immédiate après succès vers le tableau de bord
-                window.location.href = "partenaires.html";
+                btn.disabled = true;
+                btn.innerText = "Enregistrement...";
 
+                const { data, error } = await db
+                    .from('creators')
+                    .insert([{ icon: icon, name: name, code: code, commission_rate: commission_rate }])
+                    .select();
+
+                if (error) {
+                    alert("Erreur Supabase : " + error.message);
+                    return;
+                }
+
+                alert("Partenaire enregistré !");
+                window.location.href = "partenaires.html";
             } catch (err) {
-                // Si le code JavaScript plante de manière imprévue
-                alert("Erreur système générale : " + err.message);
+                alert("Erreur système : " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Enregistrer le Partenaire";
             }
         }
     </script>
 </body>
 </html>
-
