@@ -15,7 +15,7 @@
         .stats-label { font-size: 10px; color: #b0b0b0; }
         .stats-value { font-size: 16px; color: #00ffff; font-weight: bold; }
         .sidebar { height: 100%; width: 0; position: fixed; z-index: 200; top: 0; left: 0; background-color: #1a1a1a; transition: width 0.3s; padding-top: 80px; border-right: 2px solid #00ffff; overflow-x: hidden; }
-        .sidebar a, .sidebar button { padding: 15px 20px; text-decoration: none; font-size: 18px; color: white; display: flex; align-items: center; gap: 10px; border: none; background: none; width: 100%; cursor: pointer; transition: 0.2s; }
+        .sidebar a, .sidebar button { padding: 15px 20px; text-decoration: none; font-size: 18px; color: white; display: flex; align-items: center; gap: 10px; border: none; background: none; width: 100%; cursor: pointer; transition: 0.2s; text-align: left; }
         .sidebar a:hover, .sidebar button:hover { background-color: #222; color: #00ffff; }
         .sidebar.active { width: 250px; }
         .main-content { padding: 20px; }
@@ -38,6 +38,10 @@
         <button onclick="window.location.href='formulaire.html'"><i class="fas fa-plus"></i> Ajouter Produit</button>
         <button onclick="window.location.href='admin-logo.html'" style="color: #FFFFFF !important;">
             <i class="fas fa-camera"></i> Changer le Logo
+        </button>
+        <!-- Nouveau bouton Partenaires -->
+        <button onclick="window.location.href='partenaires.html'">
+            <i class="fas fa-handshake"></i> Partenaires
         </button>
     </div>
     <div class="main-content">
