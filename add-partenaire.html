@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow Market - Enregistrer un Créateur</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #050505; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
+        h1, h2 { color: #00ffff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px #00ffff; }
+        
+        .admin-container { max-width: 500px; margin: 0 auto; }
+        
+        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .btn-back { color: #aaa; text-decoration: none; font-size: 16px; font-weight: bold; transition: 0.2s; }
+        .btn-back:hover { color: #00ffff; }
+
+        .form-createur { background: #111; border: 2px solid #00ffff; padding: 25px; border-radius: 10px; box-shadow: 0 0 15px rgba(0, 255, 255, 0.1); box-sizing: border-box; }
+        .form-group { display: flex; flex-direction: column; margin-bottom: 20px; }
+        
+        label { font-size: 14px; margin-bottom: 8px; color: #b0b0b0; font-weight: bold; text-transform: uppercase; }
+        input, select { background: #222; border: 1px solid #333; padding: 12px; border-radius: 5px; color: white; font-size: 16px; outline: none; width: 100%; box-sizing: border-box; }
+        input:focus, select:focus { border-color: #00ffff; }
+        
+        .form-row-flex { display: flex; gap: 10px; width: 100%; box-sizing: border-box; }
+        .form-row-flex input { flex: 1; min-width: 0; }
+        
+        .btn-submit { background: #00ffff; color: black; border: none; padding: 14px 20px; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; width: 100%; margin-top: 10px; }
+        .btn-submit:hover { background: #00cccc; box-shadow: 0 0 10px #00ffff; }
+        
+        .btn-action { background: #00ffff; color: black; border: none; padding: 0 20px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .btn-action:hover { background: #00cccc; box-shadow: 0 0 8px #00ffff; }
+    </style>
+</head>
+<body>
+
+    <div class="admin-container">
+        <div class="header-actions">
+            <a href="partenaires.html" class="btn-back"><i class="fas fa-arrow-left"></i> Retour</a>
+        </div>
+
+        <div class="form-createur">
+            <h2>Ajouter un Créateur</h2>
+            
+            <div class="form-group">
+                <label for="c-icon">Icône de repérage</label>
+                <select id="c-icon">
+                    <option value="🔥">🔥 Feu</option>
+                    <option value="⚡">⚡ Éclair</option>
+                    <option value="👑">👑 Couronne</option>
+                    <option value="💎">💎 Diamant</option>
+                    <option value="🎯">🎯 Cible</option>
+                    <option value="🚀">🚀 Fusée</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="c-name">Nom du Partenaire</label>
+                <input type="text" id="c-name" placeholder="Ex: Alex Gaming">
+            </div>
+            
+            <div class="form-group">
+                <label for="c-code">Code Créateur</label>
+                <div class="form-row-flex">
+                    <input type="text" id="c-code" placeholder="Ex: ALEX10">
+                    <button type="button" class="btn-action" onclick="genererCodeAleatoire()">Générer</button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="c-rate">Commission / Remise (%)</label>
+                <input type="number" id="c-rate" placeholder="Ex: 15" min="0" max="100">
+            </div>
+            
+            <button type="button" class="btn-submit" onclick="creerPartenaire()">Enregistrer le Partenaire</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        function genererCodeAleatoire() {
+            const prefixe = "SHADOW";
+            const caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let suffixe = "";
+            for (let i = 0; i < 4; i++) {
+                suffixe += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+            }
+            document.getElementById('c-code').value = prefixe + suffixe;
+        }
+
+        async function creerPartenaire() {
+            try {
+                const icon = document.getElementById('c-icon').value;
+                const name = document.getElementById('c-name').value.trim();
+                const code = document.getElementById('c-code').value.trim().toUpperCase();
+                const rateValue = document.getElementById('c-rate').value;
+
+                if (!name || !code || !rateValue) {
+                    alert("Veuillez remplir tous les champs !");
+                    return;
+                }
+
+                const commission_rate = parseFloat(rateValue) / 100;
+
+                const { error } = await supabase
+                    .from('creators')
+                    .insert([{ icon, name, code, commission_rate }]);
+
+                if (error) throw error;
+
+                alert("Partenaire enregistré avec succès !");
+                
+                // Redirection vers l'espace performance
+                window.location.href = "partenaires.html";
+
+            } catch (err) {
+                alert("Erreur lors de la création : " + (err.message || err));
+            }
+        }
+    </script>
+</body>
+</html>
+
