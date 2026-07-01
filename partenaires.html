@@ -3,160 +3,455 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shadow Market - Performances Partenaires</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Shadow Market - Espace Partenaires</title>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background: #050505; color: white; font-family: sans-serif; margin: 0; padding: 15px; box-sizing: border-box; }
-        
-        /* Titres néon adaptés pour mobile */
-        h1 { color: #00ffff; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 10px #00ffff; font-size: 22px; margin: 0; }
-        h2 { color: #00ffff; text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 8px #00ffff; font-size: 16px; margin-top: 30px; margin-bottom: 10px; }
-        
-        .admin-container { max-width: 800px; margin: 0 auto; }
-        
-        /* En-tête flexible pour éviter les chevauchements */
-        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 10px; }
-        
-        .btn-nav { background: transparent; color: #00ffff; border: 2px solid #00ffff; padding: 8px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; text-decoration: none; box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); font-size: 12px; text-align: center; min-width: 110px; }
-        .btn-nav:hover { background: #00ffff; color: black; box-shadow: 0 0 15px #00ffff; }
+        :root {
+            --bg-color: #0a0a0c;
+            --panel-bg: #111116;
+            --crimson-neon: #ff0055;
+            --cyan-neon: #00ffcc;
+            --text-color: #ffffff;
+            --text-muted: #888899;
+            --border-color: #22222b;
+        }
 
-        /* Correction de la visibilité et du défilement des tableaux sur mobile */
-        .table-container { background: #111; border: 1px solid #333; border-radius: 10px; margin-top: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.5); overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; text-align: left; min-width: 400px; }
-        th { background: #00ffff; color: black; padding: 12px 10px; font-weight: bold; text-transform: uppercase; font-size: 11px; }
-        td { padding: 12px 10px; border-bottom: 1px solid #222; font-size: 13px; color: #ffffff !important; }
-        tr:hover { background: #161616; }
-        
-        .creator-icon { font-size: 16px; margin-right: 5px; vertical-align: middle; }
-        .badge-code { background: #222; border: 1px solid #00ffff; padding: 2px 6px; border-radius: 4px; color: #00ffff; font-family: monospace; font-weight: bold; font-size: 12px; }
-        .btn-delete { background: #ff3333; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; }
-        .btn-delete:hover { background: #cc0000; }
-        
-        .text-gain { color: #00ff00 !important; font-weight: bold; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        /* En-tête */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
+        }
+
+        .header h1 span {
+            color: var(--crimson-neon);
+        }
+
+        .btn-back {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-back:hover {
+            color: #fff;
+            border-color: var(--text-muted);
+        }
+
+        /* Sections / Panneaux */
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .panel-title {
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            color: var(--cyan-neon);
+            text-shadow: 0 0 8px rgba(0, 255, 204, 0.2);
+        }
+
+        /* Formulaire */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control, select {
+            width: 100%;
+            background: #050507;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus, select:focus {
+            border-color: var(--crimson-neon);
+        }
+
+        .code-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-generator {
+            background: var(--cyan-neon);
+            color: #000;
+            border: none;
+            padding: 0 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-generator:hover {
+            opacity: 0.9;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background: transparent;
+            border: 2px solid var(--crimson-neon);
+            color: #fff;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: inset 0 0 0 0 var(--crimson-neon);
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background: var(--crimson-neon);
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4);
+        }
+
+        /* Tableaux */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid #16161f;
+            color: #e2e2e9;
+        }
+
+        code {
+            background: #1c1c24;
+            padding: 3px 6px;
+            border-radius: 4px;
+            color: var(--cyan-neon);
+            font-family: monospace;
+        }
+
+        .action-cell {
+            text-align: right;
+        }
+
+        .btn-delete {
+            background: transparent;
+            border: none;
+            color: #ff4d4d;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-delete:hover {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
 
-    <div class="admin-container">
-        <div class="header-actions">
-            <h1>Espace Partenaires</h1>
-            <!-- CORRECTION ICI : Le lien pointe maintenant vers le bon fichier -->
-            <a href="add-partenaire.html" class="btn-nav"><i class="fas fa-plus"></i> Nouveau Créateur</a>
-        </div>
+    <div class="container">
         
-        <!-- Espace Performances -->
-        <h2>Performances des Codes</h2>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Utilisations</th>
-                        <th>Total Ventes</th>
-                        <th>Gains Estimés</th>
-                    </tr>
-                </thead>
-                <tbody id="performance-list">
-                    <!-- Calculé dynamiquement -->
-                </tbody>
-            </table>
+        <!-- En-tête -->
+        <div class="header">
+            <h1>Shadow<span>Market</span></h1>
+            <a href="index.html" class="btn-back">← Retour</a>
         </div>
-        
-        <!-- Liste de gestion -->
-        <h2>Gestion des Partenaires</h2>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Partenaire</th>
-                        <th>Code</th>
-                        <th>Commission</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="creators-list">
-                    <!-- Liste de gestion -->
-                </tbody>
-            </table>
+
+        <!-- Section 1 : Ajouter un créateur -->
+        <div class="panel">
+            <div class="panel-title">Ajouter un créateur</div>
+            <form id="partner-form">
+                <div class="form-group">
+                    <label for="partner-icon">Icône de repérage</label>
+                    <select id="partner-icon">
+                        <option value="🔥">🔥 Feu</option>
+                        <option value="⚡">⚡ Éclair</option>
+                        <option value="💎">💎 Diamant</option>
+                        <option value="👑">👑 Couronne</option>
+                        <option value="🎯">🎯 Cible</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="partner-name">Nom du partenaire</label>
+                    <input type="text" id="partner-name" class="form-control" placeholder="Ex: Alex Gaming" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="partner-code">Code créateur</label>
+                    <div class="code-input-container">
+                        <input type="text" id="partner-code" class="form-control" placeholder="Ex: ALEX10" required>
+                        <button type="button" class="btn-generator" id="btn-generate">Générer</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="partner-commission">Commission / Remise (%)</label>
+                    <input type="number" id="partner-commission" class="form-control" placeholder="Ex: 15" min="0" max="100" required>
+                </div>
+
+                <button type="submit" class="btn-submit" id="btn-submit-text">Enregistrer le partenaire</button>
+            </form>
         </div>
+
+        <!-- Section 2 : Performances des codes -->
+        <div class="panel">
+            <div class="panel-title">Performances des codes</div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Utilisations</th>
+                            <th>Total Ventes</th>
+                            <th>Gains</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-performances-body">
+                        <!-- Généré par JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section 3 : Gestion des partenaires -->
+        <div class="panel">
+            <div class="panel-title">Gestion des partenaires</div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Partenaire</th>
+                            <th>Code</th>
+                            <th>Commission</th>
+                            <th class="action-cell">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-gestion-body">
+                        <!-- Généré par JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        const SUPABASE_URL = 'https://jsuvimxjmjiljntmgbzu.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // --- CONFIGURATION SUPABASE INITIALISÉE ---
+        const SUPABASE_URL = "https://jsuvimxjmjiljntmgbzu.supabase.co"; 
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        async function chargerDonnees() {
-            const tbodyCreators = document.getElementById('creators-list');
-            const tbodyPerf = document.getElementById('performance-list');
-            
-            tbodyCreators.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #aaa; padding: 20px;">Chargement...</td></tr>';
-            tbodyPerf.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #aaa; padding: 20px;">Calcul des performances...</td></tr>';
-            
+        // --- ÉLÉMENTS DOM ---
+        const partnerForm = document.getElementById('partner-form');
+        const partnerIcon = document.getElementById('partner-icon');
+        const partnerName = document.getElementById('partner-name');
+        const partnerCode = document.getElementById('partner-code');
+        const partnerCommission = document.getElementById('partner-commission');
+        const btnGenerate = document.getElementById('btn-generate');
+        const btnSubmitText = document.getElementById('btn-submit-text');
+        
+        const tablePerformances = document.getElementById('table-performances-body');
+        const tableGestion = document.getElementById('table-gestion-body');
+
+        // --- FONCTION : GÉNÉRER UN CODE CRÉATEUR ---
+        btnGenerate.addEventListener('click', () => {
+            const name = partnerName.value.trim();
+            if (!name) {
+                alert("Veuillez d'abord entrer le nom du partenaire pour générer un code.");
+                return;
+            }
+            const cleanName = name.replace(/[^a-zA-Z0-9]/g, '').substring(0, 5).toUpperCase();
+            const randomNum = Math.floor(10 + Math.random() * 90);
+            partnerCode.value = `${cleanName}${randomNum}`;
+        });
+
+        // --- FONCTION : CHARGER ET AFFICHER LES PARTENAIRES ---
+        async function loadPartners() {
             try {
-                const { data: creators, error: errC } = await supabase.from('creators').select('*').order('created_at', { ascending: false });
-                const { data: orders, error: errO } = await supabase.from('orders').select('*');
-                
-                if (errC) throw errC;
-                
-                tbodyCreators.innerHTML = '';
-                tbodyPerf.innerHTML = '';
-                
-                if (!creators || creators.length === 0) {
-                    tbodyCreators.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #666; padding: 20px;">Aucun partenaire enregistré</td></tr>';
-                    tbodyPerf.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #666; padding: 20px;">Aucune donnée disponible</td></tr>';
+                const { data: creators, error } = await supabase
+                    .from('creators')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    console.error("Erreur lors de la lecture Supabase :", error);
                     return;
                 }
-                
+
+                tablePerformances.innerHTML = '';
+                tableGestion.innerHTML = '';
+
+                if (!creators || creators.length === 0) {
+                    const emptyRow = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px;">Aucun partenaire trouvé.</td></tr>`;
+                    tablePerformances.innerHTML = emptyRow;
+                    tableGestion.innerHTML = emptyRow;
+                    return;
+                }
+
                 creators.forEach(creator => {
-                    const matchingOrders = (orders || []).filter(o => o.creator_code && o.creator_code.toUpperCase() === creator.code.toUpperCase());
-                    
-                    const count = matchingOrders.length;
-                    const totalSales = matchingOrders.reduce((sum, o) => sum + (parseFloat(o.price) || 0), 0);
-                    const gains = totalSales * creator.commission_rate;
-                    
-                    // Ligne Gestion
-                    const trC = document.createElement('tr');
-                    trC.innerHTML = `
-                        <td><span class="creator-icon">${creator.icon || '👤'}</span>${creator.name}</td>
-                        <td><span class="badge-code">${creator.code}</span></td>
-                        <td>${(creator.commission_rate * 100).toFixed(0)}%</td>
-                        <td><button type="button" class="btn-delete" onclick="supprimerPartenaire('${creator.id}')">Supprimer</button></td>
+                    const displayPercent = creator.commission_rate ? `${Math.round(creator.commission_rate * 100)}%` : '0%';
+
+                    // Remplissage Tableau 1 : Performances des codes
+                    const rowPerf = document.createElement('tr');
+                    rowPerf.innerHTML = `
+                        <td><code>${creator.code}</code></td>
+                        <td>0</td>
+                        <td>0.00 €</td>
+                        <td style="color: var(--cyan-neon); font-weight: bold;">0.00 €</td>
                     `;
-                    tbodyCreators.appendChild(trC);
-                    
-                    // Ligne Performance
-                    const trP = document.createElement('tr');
-                    trP.innerHTML = `
-                        <td><span class="badge-code">${creator.code}</span></td>
-                        <td>${count}</td>
-                        <td>${totalSales.toFixed(2)} €</td>
-                        <td class="text-gain">${gains.toFixed(2)} €</td>
+                    tablePerformances.appendChild(rowPerf);
+
+                    // Remplissage Tableau 2 : Gestion des partenaires
+                    const rowGestion = document.createElement('tr');
+                    rowGestion.innerHTML = `
+                        <td>${creator.icon || '🔥'} ${creator.name}</td>
+                        <td><code>${creator.code}</code></td>
+                        <td>${displayPercent}</td>
+                        <td class="action-cell">
+                            <button class="btn-delete" onclick="deletePartner('${creator.id}')">❌</button>
+                        </td>
                     `;
-                    tbodyPerf.appendChild(trP);
+                    tableGestion.appendChild(rowGestion);
                 });
-                
+
             } catch (err) {
-                console.error(err);
-                tbodyCreators.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #ff3333; padding: 20px;">Erreur base de données</td></tr>';
-                tbodyPerf.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #ff3333; padding: 20px;">Erreur de calcul</td></tr>';
+                console.error("Erreur système lors du chargement :", err);
             }
         }
 
-        async function supprimerPartenaire(id) {
-            if (confirm("Voulez-vous vraiment supprimer ce partenaire ?")) {
-                try {
-                    const { error } = await supabase.from('creators').delete().eq('id', id);
-                    if (error) throw error;
-                    chargerDonnees();
-                } catch (err) {
-                    alert("Erreur : " + err.message);
+        // --- FONCTION : AJOUTER UN PARTENAIRE (SOUMISSION FORMULAIRE) ---
+        partnerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            btnSubmitText.disabled = true;
+            btnSubmitText.innerText = "Enregistrement...";
+
+            const iconValue = partnerIcon.value;
+            const nameValue = partnerName.value.trim();
+            const codeValue = partnerCode.value.trim();
+            const commissionValue = parseFloat(partnerCommission.value) / 100;
+
+            try {
+                const { error } = await supabase
+                    .from('creators')
+                    .insert([
+                        { 
+                            name: nameValue, 
+                            code: codeValue, 
+                            icon: iconValue, 
+                            commission_rate: commissionValue 
+                        }
+                    ]);
+
+                if (error) {
+                    alert(`Erreur Supabase : ${error.message}`);
+                } else {
+                    alert("Partenaire enregistré avec succès !");
+                    partnerForm.reset();
+                    loadPartners(); 
+                }
+            } catch (err) {
+                console.error("Erreur lors de l'envoi :", err);
+            } finally {
+                btnSubmitText.disabled = false;
+                btnSubmitText.innerText = "Enregistrer le partenaire";
+            }
+        });
+
+        // --- FONCTION : SUPPRIMER UN PARTENAIRE ---
+        window.deletePartner = async function(id) {
+            if (confirm("Voulez-vous vraiment supprimer ce partenaire de la base ?")) {
+                const { error } = await supabase
+                    .from('creators')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) {
+                    alert("Erreur lors de la suppression.");
+                } else {
+                    loadPartners();
                 }
             }
-        }
+        };
 
-        window.onload = chargerDonnees;
+        document.addEventListener('DOMContentLoaded', loadPartners);
     </script>
 </body>
 </html>
