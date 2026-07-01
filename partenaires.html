@@ -277,10 +277,10 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>Code</th>
-                            <th>Utilisations</th>
-                            <th>Total Ventes</th>
-                            <th>Gains</th>
+                            <th>Partenaire</th> <!-- Colonne 1 -->
+                            <th>Code</th>       <!-- Colonne 2 -->
+                            <th>Utilisations</th><!-- Colonne 3 -->
+                            <th>Argent généré</th><!-- Colonne 4 -->
                         </tr>
                     </thead>
                     <tbody id="table-performances-body">
@@ -315,7 +315,7 @@
     <script>
         // --- CONFIGURATION SUPABASE INITIALISÉE ---
         const SUPABASE_URL = "https://jsuvimxjmjiljntmgbzu.supabase.co"; 
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzdXZpbXhqbWppbGpudG1nYnp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4Njk0NTgsImV4cCI6MjA5ODA0NTQ1OH0.F6aDK6oTyp3Tlb9fmkqpzgn4KGAxA5-ClIKlkqzfcR4";
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // --- ÉLÉMENTS DOM ---
@@ -359,22 +359,23 @@
                 tableGestion.innerHTML = '';
 
                 if (!creators || creators.length === 0) {
-                    const emptyRow = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px;">Aucun partenaire trouvé.</td></tr>`;
-                    tablePerformances.innerHTML = emptyRow;
-                    tableGestion.innerHTML = emptyRow;
+                    const emptyRowPerf = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px;">Aucune performance trouvée.</td></tr>`;
+                    const emptyRowGestion = `<tr><td colspan="4" style="text-align:center; color:var(--text-muted); padding:20px;">Aucun partenaire trouvé.</td></tr>`;
+                    tablePerformances.innerHTML = emptyRowPerf;
+                    tableGestion.innerHTML = emptyRowGestion;
                     return;
                 }
 
                 creators.forEach(creator => {
                     const displayPercent = creator.commission_rate ? `${Math.round(creator.commission_rate * 100)}%` : '0%';
 
-                    // Remplissage Tableau 1 : Performances des codes
+                    // Remplissage Tableau 1 : Performances des codes (Conforme à ton schéma)
                     const rowPerf = document.createElement('tr');
                     rowPerf.innerHTML = `
-                        <td><code>${creator.code}</code></td>
-                        <td>0</td>
-                        <td>0.00 €</td>
-                        <td style="color: var(--cyan-neon); font-weight: bold;">0.00 €</td>
+                        <td>${creator.icon || '🔥'} ${creator.name}</td> <!-- 1 = Nom -->
+                        <td><code>${creator.code}</code></td>             <!-- 2 = Code -->
+                        <td>0</td>                                        <!-- 3 = Utilisations -->
+                        <td style="color: var(--cyan-neon); font-weight: bold;">0.00 €</td> <!-- 4 = Argent généré -->
                     `;
                     tablePerformances.appendChild(rowPerf);
 
