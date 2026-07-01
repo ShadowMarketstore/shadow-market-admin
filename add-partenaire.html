@@ -6,29 +6,30 @@
     <title>Shadow Market - Enregistrer un Créateur</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #050505; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
-        h1, h2 { color: #00ffff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px #00ffff; }
+        body { background: #050505; color: white; font-family: sans-serif; margin: 0; padding: 15px; box-sizing: border-box; }
+        h2 { color: #00ffff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px #00ffff; font-size: 24px; margin-top: 10px; margin-bottom: 25px; }
         
         .admin-container { max-width: 500px; margin: 0 auto; }
         
-        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .btn-back { color: #aaa; text-decoration: none; font-size: 16px; font-weight: bold; transition: 0.2s; }
+        .header-actions { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .btn-back { color: #aaa; text-decoration: none; font-size: 16px; font-weight: bold; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
         .btn-back:hover { color: #00ffff; }
 
+        /* Style du bloc calqué sur ta capture */
         .form-createur { background: #111; border: 2px solid #00ffff; padding: 25px; border-radius: 10px; box-shadow: 0 0 15px rgba(0, 255, 255, 0.1); box-sizing: border-box; }
         .form-group { display: flex; flex-direction: column; margin-bottom: 20px; }
         
-        label { font-size: 14px; margin-bottom: 8px; color: #b0b0b0; font-weight: bold; text-transform: uppercase; }
-        input, select { background: #222; border: 1px solid #333; padding: 12px; border-radius: 5px; color: white; font-size: 16px; outline: none; width: 100%; box-sizing: border-box; }
+        label { font-size: 13px; margin-bottom: 10px; color: #b0b0b0; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, select { background: #1e1e1e; border: 1px solid #333; padding: 14px; border-radius: 6px; color: white; font-size: 16px; outline: none; width: 100%; box-sizing: border-box; }
         input:focus, select:focus { border-color: #00ffff; }
         
         .form-row-flex { display: flex; gap: 10px; width: 100%; box-sizing: border-box; }
         .form-row-flex input { flex: 1; min-width: 0; }
         
-        .btn-submit { background: #00ffff; color: black; border: none; padding: 14px 20px; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; width: 100%; margin-top: 10px; }
-        .btn-submit:hover { background: #00cccc; box-shadow: 0 0 10px #00ffff; }
+        .btn-submit { background: #00ffff; color: black; border: none; padding: 16px 20px; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.2s; width: 100%; margin-top: 10px; box-shadow: 0 0 12px rgba(0, 255, 255, 0.3); }
+        .btn-submit:hover { background: #00cccc; box-shadow: 0 0 18px #00ffff; }
         
-        .btn-action { background: #00ffff; color: black; border: none; padding: 0 20px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .btn-action { background: #00ffff; color: black; border: none; padding: 0 22px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap; font-size: 14px; }
         .btn-action:hover { background: #00cccc; box-shadow: 0 0 8px #00ffff; }
     </style>
 </head>
@@ -106,19 +107,33 @@
 
                 const commission_rate = parseFloat(rateValue) / 100;
 
-                const { error } = await supabase
+                // Envoi hautement sécurisé à la base de données
+                const { data, error } = await supabase
                     .from('creators')
-                    .insert([{ icon, name, code, commission_rate }]);
+                    .insert([
+                        { 
+                            icon: icon, 
+                            name: name, 
+                            code: code, 
+                            commission_rate: commission_rate 
+                        }
+                    ])
+                    .select();
 
-                if (error) throw error;
+                if (error) {
+                    // Si Supabase renvoie une erreur spécifique (ex: colonne manquante ou doublon)
+                    alert("Erreur Supabase : " + error.message + " \nCode erreur : " + error.code);
+                    return;
+                }
 
-                alert("Partenaire enregistré avec succès !");
+                alert("Partenaire " + name + " enregistré avec succès !");
                 
-                // Redirection vers l'espace performance
+                // Redirection immédiate après succès vers le tableau de bord
                 window.location.href = "partenaires.html";
 
             } catch (err) {
-                alert("Erreur lors de la création : " + (err.message || err));
+                // Si le code JavaScript plante de manière imprévue
+                alert("Erreur système générale : " + err.message);
             }
         }
     </script>
